@@ -200,7 +200,6 @@ dependencies:
   - spdlog=1.17.0
   - statsmodels=0.14.6
   - streamlit=1.54.0
-  - streamlit_option_menu=0.4.0
   - tenacity=9.1.4
   - threadpoolctl=3.6.0
   - tk=8.6.15
@@ -231,4 +230,4 @@ dependencies:
       - peewee==3.19.0
       - websockets==16.0
       - yfinance==1.2.0
-prefix: /Users/guygnakpa/anaconda3/envs/WM_Digital_Assets_Strat
+      - streamlit_option_menu=0.4.0
