@@ -58,8 +58,6 @@ ICONS = {
 }
 
 def render_sidebar(current_label: str) -> None:
-    #import streamlit as st
-    #from streamlit_option_menu import option_menu
     """Renders sidebar option_menu and navigates to selected page."""
     labels = list(PAGES.keys())
     icons = [ICONS.get(lbl, "circle") for lbl in labels]
@@ -75,8 +73,4 @@ def render_sidebar(current_label: str) -> None:
 
     # Navigate only if user picked a different page
     if selected != current_label:
-        # Guard in case switch_page isn't available in Cloud
-        if hasattr(st, "switch_page"):
-            st.switch_page(PAGES[selected])
-        else:
-            st.warning("Navigation not supported in this Streamlit version.")
+        st.switch_page(PAGES[selected])
