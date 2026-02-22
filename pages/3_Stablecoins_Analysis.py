@@ -177,7 +177,6 @@ def API_Data_Top():
         st.warning("CoinGecko request was rate-limited or temporarily unavailable. Please try again later.")
         return []
 
-
 Top_Stablecoins_response = API_Data_Top()
 # store and display return of function as a dataframe \ clean: Drop columns \ print new dataframe
 Top_Stablecoins_df = pd.DataFrame(Top_Stablecoins_response)
@@ -743,6 +742,7 @@ st.write("<div style='text-align:justify'>""\n"
 #                              _________Call API for TerraUSD and Terra Luna___________
 # CallAPI/Select the needed columns
 
+@st.cache_data
 def API_TerraUSD():
     cg = CoinGeckoAPI()  # call the coingecko API
     TerraUSD_history = cg.get_coin_market_chart_by_id(id="terrausd", vs_currency="usd", days=365)
@@ -754,6 +754,7 @@ def API_TerraUSD():
 TerraUSD_history_DF = API_TerraUSD()
 
 
+@st.cache_data
 def API_TerraLuna():
     cg = CoinGeckoAPI()  # call the coingecko API
     TerraLuna_history = cg.get_coin_market_chart_by_id(id="terra-luna", vs_currency="usd", days=365)
