@@ -161,13 +161,14 @@ st.write(
 
 # ______________________________________________________________________________________________________________________#
 # Using a def-function Pull Data from coingecko: Top 18 stablecoins \ provide currency \store and display in dataframe
-@st.cache
+@st.cache_data(ttl=3600)  # cache for 1 hour (adjust as you like)
 def API_Data_Top():
     cg = CoinGeckoAPI()  # call the coingecko API
     Top_Stablecoins_response = cg.get_coins_markets(
         ids=["tether", "usd-coin", "binance-usd", "terrausd", "dai", "frax", "magic-internet-money", "true-usd",
              "pax-gold", "neutrino", "paxos-standard", "fei-usd", "liquity-usd", "tether-gold", "husd", "mimatic",
-             "gemini-dollar", "tether-eurt", "alchemix-usd", "usdx", "xsgd", "stasis-eurs", "nusd"],
+             "gemini-dollar", "tether-eurt", "alchemix-usd", "usdx", "xsgd", "stasis-eurs", "nusd"
+             ],
         vs_currency="usd")
     return Top_Stablecoins_response
 
