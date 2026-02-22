@@ -11,3 +11,4 @@ scikit-learn
 pycoingecko
 statsmodels
 requests
+openpyxl
