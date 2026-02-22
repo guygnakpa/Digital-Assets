@@ -94,14 +94,25 @@ Protocol_response_Df2 = Protocol_API()
 @st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
 def Categories_API():
     cg = CoinGeckoAPI()
-    DeFi_Categ = cg.get_coins_categories()
-    DeFi_Categ0 = pd.DataFrame(DeFi_Categ)
-    return DeFi_Categ0
+    try:
+        DeFi_Categ = cg.get_coins_categories()
+        DeFi_Categ0 = pd.DataFrame(DeFi_Categ)
+        return DeFi_Categ0
 
+    except Exception as e:
+        st.warning("CoinGecko Categories request was rate-limited or temporarily unavailable.")
+        return pd.DataFrame()  # return empty dataframe to prevent crash
 
 DeFi_categ0 = Categories_API()
-Defi_MrkCap = pd.DataFrame(DeFi_categ0[["name", "market_cap", "market_cap_change_24h", "volume_24h"]])
-Defi_Metric = Defi_MrkCap.loc[[13], :]
+
+if not DeFi_categ0.empty:
+    Defi_MrkCap = pd.DataFrame(
+        DeFi_categ0[["name", "market_cap", "market_cap_change_24h", "volume_24h"]]
+    )
+    Defi_Metric = Defi_MrkCap.loc[[13], :]
+else:
+    Defi_MrkCap = pd.DataFrame()
+    Defi_Metric = pd.DataFrame()
 
 
 @st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
