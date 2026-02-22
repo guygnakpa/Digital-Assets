@@ -1,6 +1,3 @@
-import streamlit as st
-import streamlit as st
-from streamlit_option_menu import option_menu
 import requests as r
 import babel.numbers
 from PIL import Image
@@ -21,6 +18,7 @@ import datetime
 #########################################################
 # The logic below will hide the streamlit auto page menu as it is redundant
 def hide_streamlit_nav():
+    import streamlit as st
     st.markdown("""
     <style>
         [data-testid="stSidebarNav"] {display: none;}
@@ -59,6 +57,8 @@ ICONS = {
 }
 
 def render_sidebar(current_label: str) -> None:
+    import streamlit as st
+    from streamlit_option_menu import option_menu
     """Renders sidebar option_menu and navigates to selected page."""
     labels = list(PAGES.keys())
     icons = [ICONS.get(lbl, "circle") for lbl in labels]
