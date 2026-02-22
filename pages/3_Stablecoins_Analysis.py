@@ -161,7 +161,7 @@ st.write(
 
 # ______________________________________________________________________________________________________________________#
 # Using a def-function Pull Data from coingecko: Top 18 stablecoins \ provide currency \store and display in dataframe
-@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
+@st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 def API_Data_Top():
     cg = CoinGeckoAPI()  # call the coingecko API
     try:
@@ -343,7 +343,7 @@ Null_check = BTC_USDT_DF.isnull().sum()
 
 #                           ________#Define a function to treat columns simultaneously_________
 # first ID the outlier that are behond the UL and LL limits
-@st.cache_data
+@st.cache_data(ttl=86400)
 def Outlier_limits(col):
     Q3, Q1 = np.nanpercentile(col, [75, 25])
     IQR = Q3 - Q1
@@ -742,7 +742,7 @@ st.write("<div style='text-align:justify'>""\n"
 #                              _________Call API for TerraUSD and Terra Luna___________
 # CallAPI/Select the needed columns
 
-@st.cache_data
+@st.cache_data(ttl=86400)
 def API_TerraUSD():
     cg = CoinGeckoAPI()  # call the coingecko API
     TerraUSD_history = cg.get_coin_market_chart_by_id(id="terrausd", vs_currency="usd", days=365)
@@ -754,7 +754,7 @@ def API_TerraUSD():
 TerraUSD_history_DF = API_TerraUSD()
 
 
-@st.cache_data
+@st.cache_data(ttl=86400)
 def API_TerraLuna():
     cg = CoinGeckoAPI()  # call the coingecko API
     TerraLuna_history = cg.get_coin_market_chart_by_id(id="terra-luna", vs_currency="usd", days=365)

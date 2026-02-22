@@ -48,7 +48,7 @@ st.markdown("<h1 style='text-align: center; color: white; font-size: 200%'>""DeF
 
 # _________________________________________Call API & Set Dataframes_____________________________________________________
 
-@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
+@st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 def defi_His_API():
     Chart_response = r.get("https://api.llama.fi/charts")
     Defi_His_DF = Chart_response.json()
@@ -60,7 +60,7 @@ Defi_His_DF = defi_His_API()
 Defi_His_DF["date"] = pd.to_datetime(Defi_His_DF["date"], unit="s").dt.date
 
 
-@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
+@st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 def defi_API():
     Chains_response = r.get("https://api.llama.fi/chains")
     Defi_Chains_Df = Chains_response.json()
@@ -76,7 +76,7 @@ Defi_Agr_Data0 = pd.DataFrame(Defi_Chains_Df)
 Defi_Agr_Data1 = Defi_Agr_Data0.loc[[0, 1, 3, 4, 5, 9, 23], ["name", "tvl"]]
 
 
-@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
+@st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 def Protocol_API():
     Protocol_response = r.get("https://api.llama.fi/protocols")
     Protocol_response_Df = Protocol_response.json()
@@ -91,7 +91,7 @@ def Protocol_API():
 Protocol_response_Df2 = Protocol_API()
 
 
-@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
+@st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 def Categories_API():
     cg = CoinGeckoAPI()
     try:
@@ -115,7 +115,7 @@ else:
     Defi_Metric = pd.DataFrame()
 
 
-@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
+@st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 def Defi_Categories_API():
     try:
         DeFi_Categ_response = r.get(
