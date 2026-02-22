@@ -841,7 +841,7 @@ if "S&P500" in test0:
     # insert title
     st.write("S&P 500 Analysis:")
     # insert dow S&P 500 return
-    SP500_Return = pd.read_csv("S&P500_YearlyReturn.csv")
+    SP500_Return = pd.read_csv("Data_CSV_Files/S&P500_YearlyReturn.csv")
     SP500_Return_fig = px.bar(SP500_Return, x="Year", y="Total Return", color="Total Return",
                               title="S&P 500 Yearly Return : 1927 - 2023 | Percent | Yearly")
     SP500_Return_fig.update_layout(legend_title="Features", width=1250, height=450, title_x=0.5, title_y=.85,
@@ -919,7 +919,7 @@ if "Nasdaq" in test0:
     # insert title
     st.write("Nasdaq Analysis:")
     # insert dow S&P 500 return
-    Nasda_Return = pd.read_csv("Nadsaq_YearlyReturn.csv")
+    Nasda_Return = pd.read_csv("Data_CSV_Files/Nadsaq_YearlyReturn.csv")
     Nasda_Return_fig = px.bar(Nasda_Return, x="Year", y="Total Return", color="Total Return",
                               title="Nasday Yearly Return : 1990 - 2023 | Percent | Yearly")
     Nasda_Return_fig.update_layout(legend_title="Features", width=1250, height=450, title_x=0.5, title_y=.85,
