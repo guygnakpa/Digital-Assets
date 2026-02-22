@@ -3,6 +3,7 @@ from Utilities.Navigation import render_sidebar, hide_streamlit_nav
 
 hide_streamlit_nav()
 render_sidebar("Resume")
+st.switch_page("pages/1_Resume.py")
 
 st.title("Welcome")
 st.write("Select a page from the sidebar.")
