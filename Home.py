@@ -1,11 +1,8 @@
 import streamlit as st
 from Utilities.Navigation import render_sidebar, hide_streamlit_nav
 
-hide_streamlit_nav()
-render_sidebar("Resume")
-
-st.title("Welcome")
-st.write("Select a page from the sidebar.")
+# Redirect immediately to Resume
+st.switch_page("pages/1_Resume.py")
 ##########################################################################
 ##########################################################################
 # import streamlit as st
