@@ -18,6 +18,7 @@ import statsmodels.api as sm
 # import webbrowser
 import openpyxl as xls
 import datetime
+import time
 from Utilities.Navigation import render_sidebar, hide_streamlit_nav
 # _____________________________________________________________
 st.set_page_config(page_title=" Digital Assets | Stablecoins Analysis", layout="wide")
@@ -741,12 +742,31 @@ st.write("<div style='text-align:justify'>""\n"
 
 #                              _________Call API for TerraUSD and Terra Luna___________
 # CallAPI/Select the needed columns
+@st.cache_data(ttl=86400)  # 24h cache
+def _cg_market_chart_365(coin_id: str):
+    cg = CoinGeckoAPI()  # call the coingecko API
+
+    last_err = None
+    for wait_s in (1, 3, 7):  # light retry/backoff
+        try:
+            data = cg.get_coin_market_chart_by_id(id=coin_id, vs_currency="usd", days=365)
+            return data
+        except Exception as e:
+            last_err = e
+            msg = str(e)
+            if "429" in msg or "Too Many Requests" in msg:
+                time.sleep(wait_s)
+                continue
+            break
+
+    st.warning(f"CoinGecko request failed for {coin_id} (rate-limited or unavailable).")
+    return {"prices": [], "total_volumes": []}
+
 
 @st.cache_data(ttl=86400)
 def API_TerraUSD():
-    cg = CoinGeckoAPI()  # call the coingecko API
-    TerraUSD_history = cg.get_coin_market_chart_by_id(id="terrausd", vs_currency="usd", days=365)
-    TerraUSD_history_DF = pd.DataFrame(TerraUSD_history["total_volumes"])
+    TerraUSD_history = _cg_market_chart_365("terrausd")
+    TerraUSD_history_DF = pd.DataFrame(TerraUSD_history.get("total_volumes", []))
     TerraUSD_history_DF = TerraUSD_history_DF.rename(columns={0: "Timestamp", 1: "TerraUSD Volume"})
     return TerraUSD_history_DF
 
@@ -756,19 +776,57 @@ TerraUSD_history_DF = API_TerraUSD()
 
 @st.cache_data(ttl=86400)
 def API_TerraLuna():
-    cg = CoinGeckoAPI()  # call the coingecko API
-    TerraLuna_history = cg.get_coin_market_chart_by_id(id="terra-luna", vs_currency="usd", days=365)
-    TerraLuna_history_DF = pd.DataFrame(TerraLuna_history["prices"])
+    TerraLuna_history = _cg_market_chart_365("terra-luna")
+    TerraLuna_history_DF = pd.DataFrame(TerraLuna_history.get("prices", []))
     TerraLuna_history_DF = TerraLuna_history_DF.rename(columns={0: "Timestamp", 1: "Terra Luna Price"})
     return TerraLuna_history_DF
 
 
 TerraLuna_history_DF = API_TerraLuna()
 
-# Combine Tables
-UST_LUNA_DF = TerraUSD_history_DF
-UST_LUNA_DF["Terra Luna Price"] = TerraLuna_history_DF[["Terra Luna Price"]]
+# Combine Tables (robust merge on Timestamp)
+UST_LUNA_DF = pd.merge(
+    TerraUSD_history_DF,
+    TerraLuna_history_DF[["Timestamp", "Terra Luna Price"]],
+    on="Timestamp",
+    how="left"
+)
+
 UST_LUNA_DF["Timestamp"] = pd.to_datetime(UST_LUNA_DF["Timestamp"], unit="ms").dt.date
+##############################################################################
+##############################################################################
+##############################################################################
+# @st.cache_data(ttl=86400)
+# def API_TerraUSD():
+#     cg = CoinGeckoAPI()  # call the coingecko API
+#     TerraUSD_history = cg.get_coin_market_chart_by_id(id="terrausd", vs_currency="usd", days=365)
+#     TerraUSD_history_DF = pd.DataFrame(TerraUSD_history["total_volumes"])
+#     TerraUSD_history_DF = TerraUSD_history_DF.rename(columns={0: "Timestamp", 1: "TerraUSD Volume"})
+#     return TerraUSD_history_DF
+#
+#
+# TerraUSD_history_DF = API_TerraUSD()
+#
+#
+# @st.cache_data(ttl=86400)
+# def API_TerraLuna():
+#     cg = CoinGeckoAPI()  # call the coingecko API
+#     TerraLuna_history = cg.get_coin_market_chart_by_id(id="terra-luna", vs_currency="usd", days=365)
+#     TerraLuna_history_DF = pd.DataFrame(TerraLuna_history["prices"])
+#     TerraLuna_history_DF = TerraLuna_history_DF.rename(columns={0: "Timestamp", 1: "Terra Luna Price"})
+#     return TerraLuna_history_DF
+#
+#
+# TerraLuna_history_DF = API_TerraLuna()
+#
+# # Combine Tables
+# UST_LUNA_DF = TerraUSD_history_DF
+# UST_LUNA_DF["Terra Luna Price"] = TerraLuna_history_DF[["Terra Luna Price"]]
+# UST_LUNA_DF["Timestamp"] = pd.to_datetime(UST_LUNA_DF["Timestamp"], unit="ms").dt.date
+##############################################################################
+##############################################################################
+##############################################################################
+
 
 #                              _____________Insert line graph of TerraUST/Luna___________
 UST_DF_PLOT = px.line(UST_LUNA_DF, x="Timestamp", y=["TerraUSD Volume"],
