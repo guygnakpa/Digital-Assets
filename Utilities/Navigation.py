@@ -74,5 +74,8 @@ def render_sidebar(current_label: str) -> None:
 
     # Navigate only if user picked a different page
     if selected != current_label:
-        st.switch_page(PAGES[selected])
-
+        # Guard in case switch_page isn't available in Cloud
+        if hasattr(st, "switch_page"):
+            st.switch_page(PAGES[selected])
+        else:
+            st.warning("Navigation not supported in this Streamlit version.")
