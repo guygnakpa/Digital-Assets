@@ -1,20 +1,20 @@
-import requests as r
-import babel.numbers
-from PIL import Image
-from sklearn.impute import KNNImputer
-from pycoingecko import CoinGeckoAPI
-import streamlit.components.v1 as components
-import pandas_datareader as pdr
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import yfinance as yf
-from plotly.subplots import make_subplots
-import plotly.graph_objects as go
-import statsmodels.api as sm
+#import requests as r
+#import babel.numbers
+#from PIL import Image
+#from sklearn.impute import KNNImputer
+#from pycoingecko import CoinGeckoAPI
+#import streamlit.components.v1 as components
+#import pandas_datareader as pdr
+#import pandas as pd
+#import numpy as np
+#import plotly.express as px
+#import yfinance as yf
+#from plotly.subplots import make_subplots
+#import plotly.graph_objects as go
+#import statsmodels.api as sm
 # import webbrowser
-import openpyxl as xls
-import datetime
+#import openpyxl as xls
+#import datetime
 #########################################################
 # The logic below will hide the streamlit auto page menu as it is redundant
 def hide_streamlit_nav():
