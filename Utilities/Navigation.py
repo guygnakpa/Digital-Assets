@@ -1,7 +1,5 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import streamlit as st
-from streamlit_option_menu import option_menu
 import requests as r
 import babel.numbers
 from PIL import Image
