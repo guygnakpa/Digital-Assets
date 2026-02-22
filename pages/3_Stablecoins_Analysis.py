@@ -161,16 +161,21 @@ st.write(
 
 # ______________________________________________________________________________________________________________________#
 # Using a def-function Pull Data from coingecko: Top 18 stablecoins \ provide currency \store and display in dataframe
-@st.cache_data(ttl=3600)  # cache for 1 hour (adjust as you like)
+@st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
 def API_Data_Top():
     cg = CoinGeckoAPI()  # call the coingecko API
-    Top_Stablecoins_response = cg.get_coins_markets(
-        ids=["tether", "usd-coin", "binance-usd", "terrausd", "dai", "frax", "magic-internet-money", "true-usd",
-             "pax-gold", "neutrino", "paxos-standard", "fei-usd", "liquity-usd", "tether-gold", "husd", "mimatic",
-             "gemini-dollar", "tether-eurt", "alchemix-usd", "usdx", "xsgd", "stasis-eurs", "nusd"
-             ],
-        vs_currency="usd")
-    return Top_Stablecoins_response
+    try:
+        Top_Stablecoins_response = cg.get_coins_markets(
+            ids=["tether", "usd-coin", "binance-usd", "terrausd", "dai", "frax", "magic-internet-money", "true-usd",
+                 "pax-gold", "neutrino", "paxos-standard", "fei-usd", "liquity-usd", "tether-gold", "husd", "mimatic",
+                 "gemini-dollar", "tether-eurt", "alchemix-usd", "usdx", "xsgd", "stasis-eurs", "nusd"],
+            vs_currency="usd")
+        return Top_Stablecoins_response
+
+    except Exception as e:
+        # If CoinGecko rate-limits (429) or other transient error occurs, avoid crashing the app
+        st.warning("CoinGecko request was rate-limited or temporarily unavailable. Please try again later.")
+        return []
 
 
 Top_Stablecoins_response = API_Data_Top()
