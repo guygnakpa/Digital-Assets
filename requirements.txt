@@ -1,0 +1,14 @@
+streamlit==1.54.0
+streamlit-option-menu==0.4.0
+pillow
+pandas
+pandas-datareader
+yfinance==1.2.0
+babel
+plotly
+plotly-express
+scikit-learn
+pycoingecko
+statsmodels
+requests
+openpyxl

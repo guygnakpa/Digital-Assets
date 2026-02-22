@@ -20,7 +20,7 @@ import openpyxl as xls
 import datetime
 from Utilities.Navigation import render_sidebar, hide_streamlit_nav
 # _____________________________________________________________
-st.set_page_config(page_title=" Digital Assets | Home", layout="wide")
+st.set_page_config(page_title=" Digital Assets | Resume", layout="wide")
 hide_streamlit_nav()
 # _____________________________________________________________
 # Optional: hide Streamlit chrome
