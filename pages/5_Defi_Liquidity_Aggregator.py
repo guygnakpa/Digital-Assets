@@ -117,16 +117,27 @@ else:
 
 @st.cache_data(ttl=3600 * 6)  # cache for 6 hours to reduce 429 rate-limit errors
 def Defi_Categories_API():
-    DeFi_Categ_response = r.get(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=decentralized-finance-defi&order=market_cap_desc&per_page=200&page=1&sparkline=false")
-    DeFi_Categ3 = DeFi_Categ_response.json()
-    DeFi_Categ3_Norm = pd.json_normalize(DeFi_Categ3)
-    DeFi_Categ3_Norm = pd.DataFrame(DeFi_Categ3)
-    DeFi_Categ3_Norm = DeFi_Categ3_Norm.drop(columns=["id", "symbol", "image", "roi", "last_updated"])
-    return DeFi_Categ3_Norm
+    try:
+        DeFi_Categ_response = r.get(
+            "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=decentralized-finance-defi&order=market_cap_desc&per_page=200&page=1&sparkline=false",
+            timeout=20
+        )
 
+        # Raise HTTPError for 4xx/5xx (including 429)
+        DeFi_Categ_response.raise_for_status()
+
+        DeFi_Categ3 = DeFi_Categ_response.json()
+        DeFi_Categ3_Norm = pd.json_normalize(DeFi_Categ3)
+        DeFi_Categ3_Norm = pd.DataFrame(DeFi_Categ3_Norm)
+        DeFi_Categ3_Norm = DeFi_Categ3_Norm.drop(columns=["id", "symbol", "image", "roi", "last_updated"], errors="ignore")
+        return DeFi_Categ3_Norm
+
+    except Exception as e:
+        st.warning("CoinGecko DeFi categories request was rate-limited or temporarily unavailable.")
+        return pd.DataFrame()
 
 DeFi_Categ3_Norm = Defi_Categories_API()
+
 # ___________________________________Insert Hist TVL lineChart___________________________________________________________
 Defi_His_LinePlot = px.line(Defi_His_DF, x="date", y="totalLiquidityUSD")
 Defi_His_LinePlot.update_layout(legend_title="Digital Assets", width=1300, height=550, plot_bgcolor='rgba(0,0,0,0)')
