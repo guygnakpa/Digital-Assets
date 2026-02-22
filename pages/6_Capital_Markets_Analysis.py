@@ -167,264 +167,566 @@ st.table(UnemploymentRate)
 
 st.write("___")
 ########################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+
 # ----------------------------GSPC----------------------------
 # create a variable storing the strings of specific indicies
 # define a function:doownload all indicies of a specific timeframe/return the value
-Index_GSPC = ["^GSPC"]  # ,"^IXIC","^DJI"
+#Index_GSPC = ["^GSPC"]  # ,"^IXIC","^DJI"
 
 
-@st.cache_data
+# @st.cache_data(ttl=3600)
+# def GSPC_mining(Index_GSPC):
+#     IndexGSPC_data = yf.download(Index_GSPC, start="1990-01-01", end=None)
+#     IndexGSPC_data.reset_index(inplace=True)
+#     IndexGSPC_data.rename(columns={"index": "Date"})
+#     IndexGSPC_data["Date"] = pd.to_datetime(IndexGSPC_data["Date"], unit="s").dt.date
+#     return IndexGSPC_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# IndexGSPC_data0 = GSPC_mining(Index_GSPC)
+#
+#
+# def GSPC_chart(IndexGSPC_data0):
+#     fig_GSPC = px.line(IndexGSPC_data0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="S&P500 Index: 1990 - Present | Thousands of Dollars | Yearly")
+#     fig_GSPC.update_layout(legend_title="Features", width=1300, height=450, title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     fig_GSPC.update_xaxes(showgrid=False, title="Date")
+#     fig_GSPC.update_yaxes(showgrid=True, title="Thousands of Dollars")
+#     return fig_GSPC
+#     # ----------------------------IXIC----------------------------
+#
+#
+# # define a function:doownload all indicies of a specific timeframe/return the value
+# Index_IXIC = ["^IXIC"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def IXIC_mining(Index_IXIC):
+#     IndexIXIC_data = yf.download(Index_IXIC, start="1990-01-01", end=None)
+#     IndexIXIC_data.reset_index(inplace=True)
+#     IndexIXIC_data.rename(columns={"index": "Date"})
+#     IndexIXIC_data["Date"] = pd.to_datetime(IndexIXIC_data["Date"], unit="s").dt.date
+#     return IndexIXIC_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# IndexIXIC_data0 = IXIC_mining(Index_IXIC)
+#
+#
+# def IXIC_chart(IndexIXIC_data0):
+#     fig_IXIC = px.line(IndexIXIC_data0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="Nasdaq Index: 1990 - Present | Thousands of Dollars | Yearly")
+#     fig_IXIC.update_layout(legend_title="Features", width=1300, height=450, title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     fig_IXIC.update_xaxes(showgrid=False, title="Date")
+#     fig_IXIC.update_yaxes(showgrid=True, title="Thousands of Dollars")
+#     return fig_IXIC
+#     # ----------------------------DJI----------------------------
+#
+#
+# # define a function:doownload all indicies of a specific timeframe/return the value
+# Index_DJI = ["^DJI"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def DJI_mining(Index_DJI):
+#     IndexDJI_data = yf.download(Index_DJI, start="1990-01-01", end=None)
+#     IndexDJI_data.reset_index(inplace=True)
+#     IndexDJI_data.rename(columns={"index": "Date"})
+#     IndexDJI_data["Date"] = pd.to_datetime(IndexDJI_data["Date"], unit="s").dt.date
+#     return IndexDJI_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# IndexDJI_data0 = DJI_mining(Index_DJI)
+#
+#
+# def DJI_chart(IndexDJI_data0):
+#     fig_DJI = px.line(IndexDJI_data0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                       title="Dow Jones Index: 1990 - Present | Thousands of Dollars | Yearly")
+#     fig_DJI.update_layout(legend_title="Features", width=1300, height=450, title_x=0.5, title_y=.85,
+#                           plot_bgcolor='rgba(0,0,0,0)')
+#     fig_DJI.update_xaxes(showgrid=False, title="Date")
+#     fig_DJI.update_yaxes(showgrid=True, title="Thousands of Dollars")
+#
+#     return fig_DJI
+#
+#
+# # --------------------------------------------------------Create Top stocks chart----------------------------------------
+# # ----using yfinance mine the datas for the following tickers["AAPL","MSFT","GOOGL","AMZN","META","TSLA"]-----
+# AAPL_Stock = ["AAPL"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def AAPL_mining(AAPL_Stock):
+#     Stock_AAPL_data = yf.download(AAPL_Stock, start="2005-01-01", end=None)
+#     Stock_AAPL_data.reset_index(inplace=True)
+#     Stock_AAPL_data.rename(columns={"index": "Date"})
+#     Stock_AAPL_data["Date"] = pd.to_datetime(Stock_AAPL_data["Date"], unit="s").dt.date
+#     return Stock_AAPL_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# Stock_AAPL_Stock0 = AAPL_mining(AAPL_Stock)
+#
+#
+# def AAPL_chart(Stock_AAPL_Stock0):
+#     fig_AAPL = px.line(Stock_AAPL_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="Apple: 2005 - Present")
+#     fig_AAPL.update_layout(legend_title="Features",
+#                            width=1300, height=450,
+#                            title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     return fig_AAPL
+#
+#
+# # Stock_AAPL_Stock0=AAPL_chart(Stock_AAPL_Stock0)
+# # ------------------------------------Mining data for stock:MICROSOFT------------------------------------------
+# # using yfinance mine the datas for the following tickers["AAPL","MSFT","GOOGL","AMZN","META","TSLA"]
+# MSFT_Stock = ["MSFT"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def MSFT_mining(MSFT_Stock):
+#     Stock_MSFT_data = yf.download(MSFT_Stock, start="2005-01-01", end=None)
+#     Stock_MSFT_data.reset_index(inplace=True)
+#     Stock_MSFT_data.rename(columns={"index": "Date"})
+#     Stock_MSFT_data["Date"] = pd.to_datetime(Stock_MSFT_data["Date"], unit="s").dt.date
+#     return Stock_MSFT_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# Stock_MSFT_Stock0 = MSFT_mining(MSFT_Stock)
+#
+#
+# def MSFT_chart(Stock_MSFT_Stock0):
+#     fig_MSFT = px.line(Stock_MSFT_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="Microsoft: 2005 - Present")
+#     fig_MSFT.update_layout(legend_title="Features",
+#                            width=1300, height=450,
+#                            title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     return fig_MSFT
+#
+#
+# # Stock_MSFT_Stock0=MSFT_chart(Stock_MSFT_Stock0)
+# # ------------------------------------Mining data for stock:GOOGLE------------------------------------------
+# # using yfinance mine the datas for the following tickers["AAPL","MSFT","GOOGL","AMZN","META","TSLA"]
+# GOOGL_Stock = ["GOOGL"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def GOOGL_mining(GOOGL_Stock):
+#     Stock_GOOGL_data = yf.download(GOOGL_Stock, start="2005-01-01", end=None)
+#     Stock_GOOGL_data.reset_index(inplace=True)
+#     Stock_GOOGL_data.rename(columns={"index": "Date"})
+#     Stock_GOOGL_data["Date"] = pd.to_datetime(Stock_GOOGL_data["Date"], unit="s").dt.date
+#     return Stock_GOOGL_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# Stock_GOOGL_Stock0 = GOOGL_mining(GOOGL_Stock)
+#
+#
+# def GOOGL_chart(Stock_GOOGL_Stock0):
+#     fig_GOOGL = px.line(Stock_GOOGL_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                         title="Google: 2005 - Present")
+#     fig_GOOGL.update_layout(legend_title="Features",
+#                             width=1300, height=450,
+#                             title_x=0.5, title_y=.85,
+#                             plot_bgcolor='rgba(0,0,0,0)')
+#     return fig_GOOGL
+#
+#
+# # st.plotly_chart(GOOGL_chart(Stock_GOOGL_Stock0))
+# # Stock_GOOGL_Stock0=GOOGL_chart(Stock_GOOGL_Stock0)
+# # ------------------------------------Mining data for stock:AMAZON------------------------------------------
+# AMZN_Stock = ["AMZN"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def AMZN_mining(AMZN_Stock):
+#     Stock_AMZN_data = yf.download(AMZN_Stock, start="2005-01-01", end=None)
+#     Stock_AMZN_data.reset_index(inplace=True)
+#     Stock_AMZN_data.rename(columns={"index": "Date"})
+#     Stock_AMZN_data["Date"] = pd.to_datetime(Stock_AMZN_data["Date"], unit="s").dt.date
+#     return Stock_AMZN_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# Stock_AMZN_Stock0 = AMZN_mining(AMZN_Stock)
+#
+# def AMZN_chart(Stock_AMZN_Stock0):
+#     fig_AMZN = px.line(Stock_AMZN_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="Amazon: 2005 - Present")
+#     fig_AMZN.update_layout(legend_title="Features",
+#                            width=1300, height=450,
+#                            title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     return fig_AMZN
+#
+#
+# # Stock_AMZN_Stock0=AMZN_chart(Stock_AMZN_Stock0)
+# # ------------------------------------Mining data for stock:META------------------------------------------
+# META_Stock = ["META"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def META_mining(META_Stock):
+#     Stock_META_data = yf.download(META_Stock, start="2005-01-01", end=None)
+#     Stock_META_data.reset_index(inplace=True)
+#     Stock_META_data.rename(columns={"index": "Date"})
+#     Stock_META_data["Date"] = pd.to_datetime(Stock_META_data["Date"], unit="s").dt.date
+#     return Stock_META_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# Stock_META_Stock0 = META_mining(META_Stock)
+#
+#
+# def META_chart(Stock_META_Stock0):
+#     fig_META = px.line(Stock_META_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="Meta: 2005 - Present")
+#     fig_META.update_layout(legend_title="Features",
+#                            width=1300, height=450,
+#                            title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     return fig_META
+#
+#
+# # Stock_META_Stock0=META_chart(Stock_META_Stock0)
+# # ------------------------------------Mining data for stock:TSLA------------------------------------------
+# TSLA_Stock = ["TSLA"]
+#
+#
+# @st.cache_data(ttl=3600)
+# def TSLA_mining(TSLA_Stock):
+#     Stock_TSLA_data = yf.download(TSLA_Stock, start="2005-01-01", end=None)
+#     Stock_TSLA_data.reset_index(inplace=True)
+#     Stock_TSLA_data.rename(columns={"index": "Date"})
+#     Stock_TSLA_data["Date"] = pd.to_datetime(Stock_TSLA_data["Date"], unit="s").dt.date
+#     return Stock_TSLA_data
+#
+#
+# # using streamlit call and print the function/using plotly, plot line chart incling paremeters
+# Stock_TSLA_Stock0 = TSLA_mining(TSLA_Stock)
+#
+#
+# def TSLA_chart(Stock_TSLA_Stock0):
+#     fig_TSLA = px.line(Stock_TSLA_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
+#                        title="Tesla: 2005 - Present")
+#     fig_TSLA.update_layout(legend_title="Features",
+#                            width=1300, height=450,
+#                            title_x=0.5, title_y=.85,
+#                            plot_bgcolor='rgba(0,0,0,0)')
+#     return fig_TSLA
+
+# Stock_TSLA_Stock0=TSLA_chart(Stock_TSLA_Stock0)
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+################################################################################################################################################################
+
+################################################################################################################################################################
+################################################################################################################################################################
+@st.cache_data(ttl=3600)
+def YF_mining(Ticker_List, start_date):
+    YF_data = yf.download(Ticker_List, start=start_date, end=None, auto_adjust=False, progress=False)
+
+    # If Yahoo blocks or returns empty
+    if YF_data is None or YF_data.empty:
+        st.warning(f"Yahoo Finance returned no data for: {Ticker_List}")
+        return pd.DataFrame()
+
+    # If columns are MultiIndex (common when passing a list)
+    if isinstance(YF_data.columns, pd.MultiIndex):
+        # when passing ["^GSPC"], columns may look like ("Adj Close","^GSPC")
+        # keep the first level only (OHLCV names)
+        YF_data.columns = YF_data.columns.get_level_values(0)
+
+    YF_data.reset_index(inplace=True)
+
+    # Ensure Date column exists and is date-like
+    if "Date" in YF_data.columns:
+        YF_data["Date"] = pd.to_datetime(YF_data["Date"]).dt.date
+    else:
+        # very rare, but keeps it safe
+        YF_data.rename(columns={"index": "Date"}, inplace=True)
+        if "Date" in YF_data.columns:
+            YF_data["Date"] = pd.to_datetime(YF_data["Date"]).dt.date
+
+    # Guarantee "Adj Close" exists (fallback to Close)
+    if "Adj Close" not in YF_data.columns and "Close" in YF_data.columns:
+        YF_data["Adj Close"] = YF_data["Close"]
+
+    return YF_data
+
+
+# ----------------------------GSPC----------------------------
+Index_GSPC = ["^GSPC"]
+
+@st.cache_data(ttl=3600)
 def GSPC_mining(Index_GSPC):
-    IndexGSPC_data = yf.download(Index_GSPC, start="1990-01-01", end=None)
-    IndexGSPC_data.reset_index(inplace=True)
-    IndexGSPC_data.rename(columns={"index": "Date"})
-    IndexGSPC_data["Date"] = pd.to_datetime(IndexGSPC_data["Date"], unit="s").dt.date
+    IndexGSPC_data = YF_mining(Index_GSPC, start_date="1990-01-01")
     return IndexGSPC_data
 
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
 IndexGSPC_data0 = GSPC_mining(Index_GSPC)
 
-
 def GSPC_chart(IndexGSPC_data0):
-    fig_GSPC = px.line(IndexGSPC_data0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="S&P500 Index: 1990 - Present | Thousands of Dollars | Yearly")
+    if IndexGSPC_data0.empty:
+        st.warning("S&P500 data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_GSPC = px.line(
+        IndexGSPC_data0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="S&P500 Index: 1990 - Present | Thousands of Dollars | Yearly"
+    )
     fig_GSPC.update_layout(legend_title="Features", width=1300, height=450, title_x=0.5, title_y=.85,
                            plot_bgcolor='rgba(0,0,0,0)')
     fig_GSPC.update_xaxes(showgrid=False, title="Date")
     fig_GSPC.update_yaxes(showgrid=True, title="Thousands of Dollars")
     return fig_GSPC
-    # ----------------------------IXIC----------------------------
 
 
-# define a function:doownload all indicies of a specific timeframe/return the value
+# ----------------------------IXIC----------------------------
 Index_IXIC = ["^IXIC"]
 
-
-@st.cache_data
+@st.cache_data(ttl=3600)
 def IXIC_mining(Index_IXIC):
-    IndexIXIC_data = yf.download(Index_IXIC, start="1990-01-01", end=None)
-    IndexIXIC_data.reset_index(inplace=True)
-    IndexIXIC_data.rename(columns={"index": "Date"})
-    IndexIXIC_data["Date"] = pd.to_datetime(IndexIXIC_data["Date"], unit="s").dt.date
+    IndexIXIC_data = YF_mining(Index_IXIC, start_date="1990-01-01")
     return IndexIXIC_data
 
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
 IndexIXIC_data0 = IXIC_mining(Index_IXIC)
 
-
 def IXIC_chart(IndexIXIC_data0):
-    fig_IXIC = px.line(IndexIXIC_data0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="Nasdaq Index: 1990 - Present | Thousands of Dollars | Yearly")
+    if IndexIXIC_data0.empty:
+        st.warning("Nasdaq data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_IXIC = px.line(
+        IndexIXIC_data0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Nasdaq Index: 1990 - Present | Thousands of Dollars | Yearly"
+    )
     fig_IXIC.update_layout(legend_title="Features", width=1300, height=450, title_x=0.5, title_y=.85,
                            plot_bgcolor='rgba(0,0,0,0)')
     fig_IXIC.update_xaxes(showgrid=False, title="Date")
     fig_IXIC.update_yaxes(showgrid=True, title="Thousands of Dollars")
     return fig_IXIC
-    # ----------------------------DJI----------------------------
 
 
-# define a function:doownload all indicies of a specific timeframe/return the value
+# ----------------------------DJI----------------------------
 Index_DJI = ["^DJI"]
 
-
-@st.cache_data
+@st.cache_data(ttl=3600)
 def DJI_mining(Index_DJI):
-    IndexDJI_data = yf.download(Index_DJI, start="1990-01-01", end=None)
-    IndexDJI_data.reset_index(inplace=True)
-    IndexDJI_data.rename(columns={"index": "Date"})
-    IndexDJI_data["Date"] = pd.to_datetime(IndexDJI_data["Date"], unit="s").dt.date
+    IndexDJI_data = YF_mining(Index_DJI, start_date="1990-01-01")
     return IndexDJI_data
 
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
 IndexDJI_data0 = DJI_mining(Index_DJI)
 
-
 def DJI_chart(IndexDJI_data0):
-    fig_DJI = px.line(IndexDJI_data0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                      title="Dow Jones Index: 1990 - Present | Thousands of Dollars | Yearly")
+    if IndexDJI_data0.empty:
+        st.warning("Dow Jones data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_DJI = px.line(
+        IndexDJI_data0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Dow Jones Index: 1990 - Present | Thousands of Dollars | Yearly"
+    )
     fig_DJI.update_layout(legend_title="Features", width=1300, height=450, title_x=0.5, title_y=.85,
                           plot_bgcolor='rgba(0,0,0,0)')
     fig_DJI.update_xaxes(showgrid=False, title="Date")
     fig_DJI.update_yaxes(showgrid=True, title="Thousands of Dollars")
-
     return fig_DJI
 
 
-# --------------------------------------------------------Create Top stocks chart----------------------------------------
-# ----using yfinance mine the datas for the following tickers["AAPL","MSFT","GOOGL","AMZN","META","TSLA"]-----
+# --------------------------------------------------------Top Stocks----------------------------------------
 AAPL_Stock = ["AAPL"]
-
-
-@st.cache_data
-def AAPL_mining(AAPL_Stock):
-    Stock_AAPL_data = yf.download(AAPL_Stock, start="2005-01-01", end=None)
-    Stock_AAPL_data.reset_index(inplace=True)
-    Stock_AAPL_data.rename(columns={"index": "Date"})
-    Stock_AAPL_data["Date"] = pd.to_datetime(Stock_AAPL_data["Date"], unit="s").dt.date
-    return Stock_AAPL_data
-
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
-Stock_AAPL_Stock0 = AAPL_mining(AAPL_Stock)
-
-
-def AAPL_chart(Stock_AAPL_Stock0):
-    fig_AAPL = px.line(Stock_AAPL_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="Apple: 2005 - Present")
-    fig_AAPL.update_layout(legend_title="Features",
-                           width=1300, height=450,
-                           title_x=0.5, title_y=.85,
-                           plot_bgcolor='rgba(0,0,0,0)')
-    return fig_AAPL
-
-
-# Stock_AAPL_Stock0=AAPL_chart(Stock_AAPL_Stock0)
-# ------------------------------------Mining data for stock:MICROSOFT------------------------------------------
-# using yfinance mine the datas for the following tickers["AAPL","MSFT","GOOGL","AMZN","META","TSLA"]
 MSFT_Stock = ["MSFT"]
-
-
-@st.cache_data
-def MSFT_mining(MSFT_Stock):
-    Stock_MSFT_data = yf.download(MSFT_Stock, start="2005-01-01", end=None)
-    Stock_MSFT_data.reset_index(inplace=True)
-    Stock_MSFT_data.rename(columns={"index": "Date"})
-    Stock_MSFT_data["Date"] = pd.to_datetime(Stock_MSFT_data["Date"], unit="s").dt.date
-    return Stock_MSFT_data
-
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
-Stock_MSFT_Stock0 = MSFT_mining(MSFT_Stock)
-
-
-def MSFT_chart(Stock_MSFT_Stock0):
-    fig_MSFT = px.line(Stock_MSFT_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="Microsoft: 2005 - Present")
-    fig_MSFT.update_layout(legend_title="Features",
-                           width=1300, height=450,
-                           title_x=0.5, title_y=.85,
-                           plot_bgcolor='rgba(0,0,0,0)')
-    return fig_MSFT
-
-
-# Stock_MSFT_Stock0=MSFT_chart(Stock_MSFT_Stock0)
-# ------------------------------------Mining data for stock:GOOGLE------------------------------------------
-# using yfinance mine the datas for the following tickers["AAPL","MSFT","GOOGL","AMZN","META","TSLA"]
 GOOGL_Stock = ["GOOGL"]
-
-
-@st.cache_data
-def GOOGL_mining(GOOGL_Stock):
-    Stock_GOOGL_data = yf.download(GOOGL_Stock, start="2005-01-01", end=None)
-    Stock_GOOGL_data.reset_index(inplace=True)
-    Stock_GOOGL_data.rename(columns={"index": "Date"})
-    Stock_GOOGL_data["Date"] = pd.to_datetime(Stock_GOOGL_data["Date"], unit="s").dt.date
-    return Stock_GOOGL_data
-
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
-Stock_GOOGL_Stock0 = GOOGL_mining(GOOGL_Stock)
-
-
-def GOOGL_chart(Stock_GOOGL_Stock0):
-    fig_GOOGL = px.line(Stock_GOOGL_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                        title="Google: 2005 - Present")
-    fig_GOOGL.update_layout(legend_title="Features",
-                            width=1300, height=450,
-                            title_x=0.5, title_y=.85,
-                            plot_bgcolor='rgba(0,0,0,0)')
-    return fig_GOOGL
-
-
-# st.plotly_chart(GOOGL_chart(Stock_GOOGL_Stock0))
-# Stock_GOOGL_Stock0=GOOGL_chart(Stock_GOOGL_Stock0)
-# ------------------------------------Mining data for stock:AMAZON------------------------------------------
 AMZN_Stock = ["AMZN"]
-
-
-@st.cache_data
-def AMZN_mining(AMZN_Stock):
-    Stock_AMZN_data = yf.download(AMZN_Stock, start="2005-01-01", end=None)
-    Stock_AMZN_data.reset_index(inplace=True)
-    Stock_AMZN_data.rename(columns={"index": "Date"})
-    Stock_AMZN_data["Date"] = pd.to_datetime(Stock_AMZN_data["Date"], unit="s").dt.date
-    return Stock_AMZN_data
-
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
-Stock_AMZN_Stock0 = AMZN_mining(AMZN_Stock)
-
-
-def AMZN_chart(Stock_AMZN_Stock0):
-    fig_AMZN = px.line(Stock_AMZN_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="Amazon: 2005 - Present")
-    fig_AMZN.update_layout(legend_title="Features",
-                           width=1300, height=450,
-                           title_x=0.5, title_y=.85,
-                           plot_bgcolor='rgba(0,0,0,0)')
-    return fig_AMZN
-
-
-# Stock_AMZN_Stock0=AMZN_chart(Stock_AMZN_Stock0)
-# ------------------------------------Mining data for stock:META------------------------------------------
 META_Stock = ["META"]
-
-
-@st.cache_data
-def META_mining(META_Stock):
-    Stock_META_data = yf.download(META_Stock, start="2005-01-01", end=None)
-    Stock_META_data.reset_index(inplace=True)
-    Stock_META_data.rename(columns={"index": "Date"})
-    Stock_META_data["Date"] = pd.to_datetime(Stock_META_data["Date"], unit="s").dt.date
-    return Stock_META_data
-
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
-Stock_META_Stock0 = META_mining(META_Stock)
-
-
-def META_chart(Stock_META_Stock0):
-    fig_META = px.line(Stock_META_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="Meta: 2005 - Present")
-    fig_META.update_layout(legend_title="Features",
-                           width=1300, height=450,
-                           title_x=0.5, title_y=.85,
-                           plot_bgcolor='rgba(0,0,0,0)')
-    return fig_META
-
-
-# Stock_META_Stock0=META_chart(Stock_META_Stock0)
-# ------------------------------------Mining data for stock:TSLA------------------------------------------
 TSLA_Stock = ["TSLA"]
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
+def AAPL_mining(AAPL_Stock):
+    Stock_AAPL_data = YF_mining(AAPL_Stock, start_date="2005-01-01")
+    return Stock_AAPL_data
+
+Stock_AAPL_Stock0 = AAPL_mining(AAPL_Stock)
+
+def AAPL_chart(Stock_AAPL_Stock0):
+    if Stock_AAPL_Stock0.empty:
+        st.warning("AAPL data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_AAPL = px.line(
+        Stock_AAPL_Stock0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Apple: 2005 - Present"
+    )
+    fig_AAPL.update_layout(
+        legend_title="Features",
+        width=1300, height=450,
+        title_x=0.5, title_y=.85,
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig_AAPL
+
+
+@st.cache_data(ttl=3600)
+def MSFT_mining(MSFT_Stock):
+    Stock_MSFT_data = YF_mining(MSFT_Stock, start_date="2005-01-01")
+    return Stock_MSFT_data
+
+Stock_MSFT_Stock0 = MSFT_mining(MSFT_Stock)
+
+def MSFT_chart(Stock_MSFT_Stock0):
+    if Stock_MSFT_Stock0.empty:
+        st.warning("MSFT data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_MSFT = px.line(
+        Stock_MSFT_Stock0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Microsoft: 2005 - Present"
+    )
+    fig_MSFT.update_layout(
+        legend_title="Features",
+        width=1300, height=450,
+        title_x=0.5, title_y=.85,
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig_MSFT
+
+
+@st.cache_data(ttl=3600)
+def GOOGL_mining(GOOGL_Stock):
+    Stock_GOOGL_data = YF_mining(GOOGL_Stock, start_date="2005-01-01")
+    return Stock_GOOGL_data
+
+Stock_GOOGL_Stock0 = GOOGL_mining(GOOGL_Stock)
+
+def GOOGL_chart(Stock_GOOGL_Stock0):
+    if Stock_GOOGL_Stock0.empty:
+        st.warning("GOOGL data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_GOOGL = px.line(
+        Stock_GOOGL_Stock0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Google: 2005 - Present"
+    )
+    fig_GOOGL.update_layout(
+        legend_title="Features",
+        width=1300, height=450,
+        title_x=0.5, title_y=.85,
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig_GOOGL
+
+
+@st.cache_data(ttl=3600)
+def AMZN_mining(AMZN_Stock):
+    Stock_AMZN_data = YF_mining(AMZN_Stock, start_date="2005-01-01")
+    return Stock_AMZN_data
+
+Stock_AMZN_Stock0 = AMZN_mining(AMZN_Stock)
+
+def AMZN_chart(Stock_AMZN_Stock0):
+    if Stock_AMZN_Stock0.empty:
+        st.warning("AMZN data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_AMZN = px.line(
+        Stock_AMZN_Stock0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Amazon: 2005 - Present"
+    )
+    fig_AMZN.update_layout(
+        legend_title="Features",
+        width=1300, height=450,
+        title_x=0.5, title_y=.85,
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig_AMZN
+
+
+@st.cache_data(ttl=3600)
+def META_mining(META_Stock):
+    Stock_META_data = YF_mining(META_Stock, start_date="2005-01-01")
+    return Stock_META_data
+
+Stock_META_Stock0 = META_mining(META_Stock)
+
+def META_chart(Stock_META_Stock0):
+    if Stock_META_Stock0.empty:
+        st.warning("META data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_META = px.line(
+        Stock_META_Stock0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Meta: 2005 - Present"
+    )
+    fig_META.update_layout(
+        legend_title="Features",
+        width=1300, height=450,
+        title_x=0.5, title_y=.85,
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
+    return fig_META
+
+
+@st.cache_data(ttl=3600)
 def TSLA_mining(TSLA_Stock):
-    Stock_TSLA_data = yf.download(TSLA_Stock, start="2005-01-01", end=None)
-    Stock_TSLA_data.reset_index(inplace=True)
-    Stock_TSLA_data.rename(columns={"index": "Date"})
-    Stock_TSLA_data["Date"] = pd.to_datetime(Stock_TSLA_data["Date"], unit="s").dt.date
+    Stock_TSLA_data = YF_mining(TSLA_Stock, start_date="2005-01-01")
     return Stock_TSLA_data
 
-
-# using streamlit call and print the function/using plotly, plot line chart incling paremeters
 Stock_TSLA_Stock0 = TSLA_mining(TSLA_Stock)
 
-
 def TSLA_chart(Stock_TSLA_Stock0):
-    fig_TSLA = px.line(Stock_TSLA_Stock0, x="Date", y=["Adj Close", "Open", "Close", "High", "Low"],
-                       title="Tesla: 2005 - Present")
-    fig_TSLA.update_layout(legend_title="Features",
-                           width=1300, height=450,
-                           title_x=0.5, title_y=.85,
-                           plot_bgcolor='rgba(0,0,0,0)')
+    if Stock_TSLA_Stock0.empty:
+        st.warning("TSLA data unavailable (Yahoo throttling or empty response).")
+        return None
+
+    fig_TSLA = px.line(
+        Stock_TSLA_Stock0,
+        x="Date",
+        y=["Adj Close", "Open", "Close", "High", "Low"],
+        title="Tesla: 2005 - Present"
+    )
+    fig_TSLA.update_layout(
+        legend_title="Features",
+        width=1300, height=450,
+        title_x=0.5, title_y=.85,
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     return fig_TSLA
 
+################################################################################################################################################################
+################################################################################################################################################################
 
-# Stock_TSLA_Stock0=TSLA_chart(Stock_TSLA_Stock0)
 
 # ----------------------------------Create Drop down Buttons for indecies/Index Analysis--------------------------------------------------
 # using streamlit module/def function create botton for each index
@@ -691,22 +993,53 @@ if "Nasdaq" in test0:
 
 # --------------------------------Create Drop down Buttons for TopTechStock/Index Analysis--------------------------------------------------
 TopTechStock_Category = ["Apple", "Microsoft", "Google", "Amazon", "Meta", "Tesla"]
-test1 = st.multiselect("Tech Stocks: Select 👇 for a comparison of Time-Series visualization", TopTechStock_Category)
-if "Apple" in test1:
-    st.plotly_chart(AAPL_chart(Stock_AAPL_Stock0))
-if "Microsoft" in test1:
-    st.plotly_chart(MSFT_chart(Stock_MSFT_Stock0))
-if "Google" in test1:
-    st.plotly_chart(GOOGL_chart(Stock_GOOGL_Stock0))
-if "Amazon" in test1:
-    st.plotly_chart(AMZN_chart(Stock_AMZN_Stock0))
-if "Meta" in test1:
-    st.plotly_chart(META_chart(Stock_META_Stock0))
-if "Tesla" in test1:
-    st.plotly_chart(TSLA_chart(Stock_TSLA_Stock0))
+
+test1 = st.multiselect(
+    "Tech Stocks: Select 👇 for a comparison of Time-Series visualization",
+    TopTechStock_Category
+)
+
+# Map selection to chart functions + preloaded data
+chart_map = {
+    "Apple": lambda: AAPL_chart(Stock_AAPL_Stock0),
+    "Microsoft": lambda: MSFT_chart(Stock_MSFT_Stock0),
+    "Google": lambda: GOOGL_chart(Stock_GOOGL_Stock0),
+    "Amazon": lambda: AMZN_chart(Stock_AMZN_Stock0),
+    "Meta": lambda: META_chart(Stock_META_Stock0),
+    "Tesla": lambda: TSLA_chart(Stock_TSLA_Stock0),
+}
+
+for stock in test1:
+    fig = chart_map[stock]()
+    if fig is not None:  # prevents crash if Yahoo returned empty
+        st.plotly_chart(fig)
 
 st.write("---")
 
+
+
+######################################################
+#####################################################
+######################################################
+# TopTechStock_Category = ["Apple", "Microsoft", "Google", "Amazon", "Meta", "Tesla"]
+# test1 = st.multiselect("Tech Stocks: Select 👇 for a comparison of Time-Series visualization", TopTechStock_Category)
+# if "Apple" in test1:
+#     st.plotly_chart(AAPL_chart(Stock_AAPL_Stock0))
+# if "Microsoft" in test1:
+#     st.plotly_chart(MSFT_chart(Stock_MSFT_Stock0))
+# if "Google" in test1:
+#     st.plotly_chart(GOOGL_chart(Stock_GOOGL_Stock0))
+# if "Amazon" in test1:
+#     st.plotly_chart(AMZN_chart(Stock_AMZN_Stock0))
+# if "Meta" in test1:
+#     st.plotly_chart(META_chart(Stock_META_Stock0))
+# if "Tesla" in test1:
+#     st.plotly_chart(TSLA_chart(Stock_TSLA_Stock0))
+#
+# st.write("---")
+########################################################
+#########################################################
+#########################################################
 
 # --------------------------------Create visualisation for Bond ETFs MrkCap-------------------------------
 # extract data and prep dataframe
