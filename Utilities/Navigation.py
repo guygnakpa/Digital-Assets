@@ -28,8 +28,7 @@ def hide_streamlit_nav():
 #########################################################
 # Label -> page file path (relative to app root)
 PAGES = {
-    "Home": "Home.py",
-    #"Resume": "pages/1_Resume.py",
+    "Resume": "pages/1_Resume.py",
     "Institutional Digital Assets Operating Model Library": "pages/2_Institutional_Digital_Assets_Operating_Model_Library.py",
     "Stablecoins Analysis": "pages/3_Stablecoins_Analysis.py",
     "Geography of Cryptocurrency Report": "pages/4_Geography_of_Cryptocurrency_Report.py",
