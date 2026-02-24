@@ -1046,6 +1046,151 @@ st.write("---")
 # Define the bond ticker symbol
 # ______________________________________Bonds ETFs_______________________
 # 1. Use Streamlit caching to prevent frequent hits
+# @st.cache_data(ttl=3600)
+# def get_bond_market_caps(tickers):
+#     caps = {}
+#     for t in tickers:
+#         try:
+#             # Let yfinance handle the session internally (requires curl_cffi installed)
+#             ticker_obj = yf.Ticker(t)
+#             caps[t] = ticker_obj.info.get("marketCap")
+#         except Exception as e:
+#             st.warning(f"Could not pull data for {t}: {e}")
+#             caps[t] = None
+#     return caps
+#
+#
+# # Variables
+# bond_etfs = ['AGG', 'HYG', 'LQD', "TLT", "SHY", "IEF"]
+#
+# #st.title("Bond ETF Market Analysis")
+#
+# with st.spinner("Fetching data using curl_cffi..."):
+#     market_cap_dict = get_bond_market_caps(bond_etfs)
+#
+# # Prep Dataframe
+# market_cap = pd.Series(market_cap_dict, name="marketCap")
+# Bond_MrkCap = pd.DataFrame(market_cap).dropna()
+# Bond_MrkCap = Bond_MrkCap.sort_values(by="marketCap", ascending=False).reset_index()
+# Bond_MrkCap.columns = ['Ticker', 'marketCap']
+#
+# # Visualization
+# if not Bond_MrkCap.empty:
+#     Bond_MrkCap_fig = px.bar(
+#         Bond_MrkCap,
+#         x="Ticker",
+#         y="marketCap",
+#         color="Ticker",
+#         title="Market Capitalization | Bond ETFs",
+#         template="plotly_white"
+#     )
+#     st.plotly_chart(Bond_MrkCap_fig)
+# else:
+#     st.error("No data available to display.")
+#
+#
+# # _______________________________________________________________________
+# BOND_ETF_COLA, BOND_ETF_COLB = st.columns(2, border=True)
+# with BOND_ETF_COLA:
+#     st.write("ishares Core U.S. Aggregate Bond ETF(AGG)")
+#     st.info("""
+#        - Offers broad-based exposure to investment grade U.S. Bonds
+#        - Structured for long-term portfolio strategy
+#        - Includes hundreds of individual securities with the aim to mitigate illiquid challenges
+#        """)
+#     st.write("ishares iboxx $ Investment Grade Corporate Bond ETF(LQD)")
+#     st.info("""
+#        - Offers exposure to investment grade corporate bonds
+#        - Structured for long-term portfolio strategy
+#        - Positive yield and low risk due to length of maturity
+#        """)
+#     st.write("ishares 1-3 Year Treasury Bond ETF(SHY)")
+#     st.info("""
+#        - Offers short-term maturity exposure
+#        - Structured for low expected return
+#        - Offers exposure to securities 1-3 years to maturity
+#        """)
+# with BOND_ETF_COLB:
+#     st.write("ishares iboxx $ High Yield Corporate Bond ETF(HYG)")
+#     st.info("""
+#     - Offers exposure to U.S. dollar-denominated high yield liquid corporate bon market
+#     - High yield with high risk(higher potential for participants to default)
+#     - Majority of the securities are corporate bonds rated between B and BB
+#     """)
+#     st.write("ishares 7-10 Year Treasury Bond ETF(IEF)")
+#     st.info("""
+#     - Offers exposure to treasury bonds securities 7-10 years to maturity
+#     - Offers higher return then short-term securities
+#     - Moderate levels of risk
+#     """)
+#     st.write("iShares 20+ Year Treasury Bond ETF(TLT)")
+#     st.info("""
+#     - Offers exposure to long-dated securities with low credit risk
+#     - Offers higher liquidity exposure
+#     - Efficient and cost effective
+#     """)
+# st.write("---")
+# # ______________________________________Tokenized ETFs_______________________
+# # 1. Use Streamlit caching to prevent frequent hits
+# @st.cache_data(ttl=3600)
+# def get_tokenized_assets_data(tickers):
+#     data = {}
+#     for t in tickers:
+#         try:
+#             ticker_obj = yf.Ticker(t)
+#             info = ticker_obj.info
+#
+#             # Use totalAssets (AUM) as primary for ETFs, marketCap as fallback
+#             # This is more reliable for funds like IBIT and ETHA
+#             aum = info.get("totalAssets") or info.get("marketCap")
+#
+#             # Special handling for BUIDL-USD or similar tokens
+#             if not aum and t == 'BUIDL-USD':
+#                 # BUIDL often requires supply * price if AUM field is empty
+#                 price = info.get("regularMarketPrice")
+#                 supply = info.get("circulatingSupply")
+#                 if price and supply:
+#                     aum = price * supply
+#
+#             data[t] = aum
+#         except Exception as e:
+#             st.warning(f"Could not pull data for {t}: {e}")
+#             data[t] = None
+#     return data
+#
+#
+# # Variables
+# tokenized_assets = ['IBIT', 'ETHA', 'BSOL', 'FBTC',
+#                     'BTC', 'ETH', 'GBTC', 'ARKB', 'ETHE', 'HODL']
+#
+# #st.subheader("Digital Assets ETF Analysis")
+#
+# with st.spinner("Fetching AUM data..."):
+#     asset_data_dict = get_tokenized_assets_data(tokenized_assets)
+#
+# # Prep Dataframe
+# Tokenized_AUM = pd.Series(asset_data_dict, name="AUM").dropna()
+# df_viz = pd.DataFrame(Tokenized_AUM).sort_values(by="AUM", ascending=False).reset_index()
+# df_viz.columns = ['Ticker', 'AUM']
+#
+# # Visualization
+# if not df_viz.empty:
+#     fig = px.bar(
+#         df_viz,
+#         x="Ticker",
+#         y="AUM",
+#         color="Ticker",
+#         title="Assets Under Management (AUM) | Digital Assets ETFs",
+#         labels={"AUM": "Assets Under Management (USD)"},
+#         template="plotly_white"
+#     )
+#     st.plotly_chart(fig)
+# else:
+#     st.error("No AUM data found. Yahoo Finance may not track AUM for these specific tickers currently.")
+################################################################################################################
+################################################################################################################
+
+
 @st.cache_data(ttl=3600)
 def get_bond_market_caps(tickers):
     caps = {}
@@ -1058,7 +1203,6 @@ def get_bond_market_caps(tickers):
             st.warning(f"Could not pull data for {t}: {e}")
             caps[t] = None
     return caps
-
 
 # Variables
 bond_etfs = ['AGG', 'HYG', 'LQD', "TLT", "SHY", "IEF"]
@@ -1087,7 +1231,6 @@ if not Bond_MrkCap.empty:
     st.plotly_chart(Bond_MrkCap_fig)
 else:
     st.error("No data available to display.")
-
 
 # _______________________________________________________________________
 BOND_ETF_COLA, BOND_ETF_COLB = st.columns(2, border=True)
@@ -1158,13 +1301,11 @@ def get_tokenized_assets_data(tickers):
             data[t] = None
     return data
 
-
 # Variables
 tokenized_assets = ['IBIT', 'ETHA', 'BSOL', 'FBTC',
                     'BTC', 'ETH', 'GBTC', 'ARKB', 'ETHE', 'HODL']
 
 #st.subheader("Digital Assets ETF Analysis")
-
 with st.spinner("Fetching AUM data..."):
     asset_data_dict = get_tokenized_assets_data(tokenized_assets)
 
@@ -1187,6 +1328,7 @@ if not df_viz.empty:
     st.plotly_chart(fig)
 else:
     st.error("No AUM data found. Yahoo Finance may not track AUM for these specific tickers currently.")
+
 # ______________________________________
 DigitalAssets_ETF_IBIT, DigitalAssets_ETF_ETHA = st.columns(2, border=True)
 with DigitalAssets_ETF_IBIT:
