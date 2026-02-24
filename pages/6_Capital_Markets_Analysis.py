@@ -760,7 +760,7 @@ if "Dow Jones" in test0:
 
     st.write("Dow Jones Analysis:")
     # insert dow jones yearyly return
-    Dow_Return = pd.read_csv("DowJones_YearlyReturn.csv")
+    Dow_Return = pd.read_csv("Data_CSV_Files/DowJones_YearlyReturn.csv")
     Dow_Return_fig = px.bar(Dow_Return, x="Year", y="Total Return", color="Total Return",
                             title="Dow Jones Yearly Return : 1893 - 2023 | Percent | Yearly")
     Dow_Return_fig.update_layout(legend_title="Features", width=1250, height=450, title_x=0.5, title_y=.85,
