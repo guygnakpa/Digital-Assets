@@ -70,12 +70,12 @@ with Space_col1:
             <a href="https://www.linkedin.com/in/guy-gnakpa/"
                target="_blank"
                style="font-size:13px; text-decoration:none; color:#0077B5; font-weight:600; margin-right: 14px;">
-               🔗 LinkedIn
+               💼 LinkedIn
             </a>
             <a href="https://github.com/guygnakpa"
                target="_blank"
                style="font-size:13px; text-decoration:none; color:#0077B5; font-weight:600;">
-               🔗 Github
+               💻 GitHub
             </a>
         </div>
         """,
