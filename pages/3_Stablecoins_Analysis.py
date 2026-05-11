@@ -199,7 +199,7 @@ TopStablecoin_button.write("""
 
 # __________________________Fiat-Backed Stablecoins___________________________#
 Fiat_Backed_Stablecoins_New_df = Top_Stablecoins_New_df[
-    Top_Stablecoins_New_df["name"].isin(["Tether", "USD Coin", "Binance USD",
+    Top_Stablecoins_New_df["name"].isin(["Tether", "USD Coin", "USDC", "Binance USD",
                                          "TrueUSD", "HUSD", "Gemini Dollar", "Pax Dollar", "Euro Tether",
                                          "STASIS EURO", "XSGD"])].sort_index(ascending=False)
 # st.dataframe(Fiat_Backed_Stablecoins_New_df)
@@ -742,6 +742,68 @@ st.write("<div style='text-align:justify'>""\n"
 
 #                              _________Call API for TerraUSD and Terra Luna___________
 # CallAPI/Select the needed columns
+
+@st.cache_data(ttl=86400)  # 24h cache
+def _cg_market_chart_365(coin_id: str):
+    cg = CoinGeckoAPI()
+
+    last_err = None
+    for wait_s in (1, 3, 7):
+        try:
+            data = cg.get_coin_market_chart_by_id(
+                id=coin_id,
+                vs_currency="usd",
+                days=365
+            )
+            return data
+        except Exception as e:
+            last_err = e
+            msg = str(e)
+            if "429" in msg or "Too Many Requests" in msg:
+                time.sleep(wait_s)
+                continue
+            break
+
+    st.warning(f"CoinGecko request failed for {coin_id} (rate-limited or unavailable).")
+    return {"prices": [], "total_volumes": []}
+
+
+# ---------------------- TerraUSD ----------------------
+
+@st.cache_data(ttl=86400)
+def API_TerraUSD():
+    TerraUSD_history = _cg_market_chart_365("USTC")
+
+    TerraUSD_history_DF = pd.DataFrame(
+        TerraUSD_history.get("total_volumes", []),
+        columns=["Timestamp", "TerraUSD Volume"]
+    )
+
+    if TerraUSD_history_DF.empty:
+        return TerraUSD_history_DF
+
+    # Convert timestamp
+    TerraUSD_history_DF["Timestamp"] = pd.to_datetime(
+        TerraUSD_history_DF["Timestamp"], unit="ms"
+    )
+
+    # Apply date filter
+    start_date = pd.Timestamp("2020-01-01")
+    end_date = pd.Timestamp("2022-12-31")
+
+    TerraUSD_history_DF = TerraUSD_history_DF[
+        (TerraUSD_history_DF["Timestamp"] >= start_date) &
+        (TerraUSD_history_DF["Timestamp"] <= end_date)
+    ]
+
+    return TerraUSD_history_DF
+
+
+TerraUSD_history_DF = API_TerraUSD()
+
+
+# ---------------------- Terra Luna ----------------------
+
 @st.cache_data(ttl=86400)  # 24h cache
 def _cg_market_chart_365(coin_id: str):
     cg = CoinGeckoAPI()  # call the coingecko API
@@ -793,6 +855,7 @@ UST_LUNA_DF = pd.merge(
 )
 
 UST_LUNA_DF["Timestamp"] = pd.to_datetime(UST_LUNA_DF["Timestamp"], unit="ms").dt.date
+
 ##############################################################################
 ##############################################################################
 ##############################################################################

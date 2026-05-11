@@ -210,9 +210,33 @@ st.info("""
     """)
 
 SAR_Tableau_Dashboard = """
-    <div class='tableauPlaceholder' id='viz1771480213940' style='position: relative'><noscript><a href='#'><img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Fi&#47;FinancialCrimes_Dashboard&#47;Dashboard1&#47;1_rss.png' style='border: none' /></a></noscript><object class='tableauViz'  style='display:none;'><param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' /> <param name='embed_code_version' value='3' /> <param name='site_root' value='' /><param name='name' value='FinancialCrimes_Dashboard&#47;Dashboard1' /><param name='tabs' value='no' /><param name='toolbar' value='yes' /><param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Fi&#47;FinancialCrimes_Dashboard&#47;Dashboard1&#47;1.png' /> <param name='animate_transition' value='yes' /><param name='display_static_image' value='yes' /><param name='display_spinner' value='yes' /><param name='display_overlay' value='yes' /><param name='display_count' value='yes' /><param name='language' value='en-US' /></object></div>                <script type='text/javascript'>                    var divElement = document.getElementById('viz1771480213940');                    var vizElement = divElement.getElementsByTagName('object')[0];                    if ( divElement.offsetWidth > 800 ) { vizElement.style.minWidth='420px';vizElement.style.maxWidth='650px';vizElement.style.width='100%';vizElement.style.minHeight='587px';vizElement.style.maxHeight='887px';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else if ( divElement.offsetWidth > 500 ) { vizElement.style.minWidth='420px';vizElement.style.maxWidth='650px';vizElement.style.width='100%';vizElement.style.minHeight='587px';vizElement.style.maxHeight='887px';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';} else { vizElement.style.width='100%';vizElement.style.height='1427px';}                     var scriptElement = document.createElement('script');                    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    vizElement.parentNode.insertBefore(scriptElement, vizElement);                </script>        
+    <div class='tableauPlaceholder' id='viz1771480213940' style='position: relative; width: 100%;'>
+    <noscript><a href='#'><img alt='Dashboard 1 ' src='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Fi&#47;FinancialCrimes_Dashboard&#47;Dashboard1&#47;1_rss.png' style='border: none' /></a></noscript>
+    <object class='tableauViz' style='display:none; width: 100%; height: 820px;'>
+    <param name='host_url' value='https%3A%2F%2Fpublic.tableau.com%2F' />
+    <param name='embed_code_version' value='3' />
+    <param name='site_root' value='' />
+    <param name='name' value='FinancialCrimes_Dashboard&#47;Dashboard1' />
+    <param name='tabs' value='no' />
+    <param name='toolbar' value='yes' />
+    <param name='static_image' value='https:&#47;&#47;public.tableau.com&#47;static&#47;images&#47;Fi&#47;FinancialCrimes_Dashboard&#47;Dashboard1&#47;1.png' />
+    <param name='animate_transition' value='yes' />
+    <param name='display_static_image' value='yes' />
+    <param name='display_spinner' value='yes' />
+    <param name='display_overlay' value='yes' />
+    <param name='display_count' value='yes' />
+    <param name='language' value='en-US' />
+    </object></div>
+    <script type='text/javascript'>
+    var divElement = document.getElementById('viz1771480213940');
+    var vizElement = divElement.getElementsByTagName('object')[0];
+    vizElement.style.width = '100%';
+    vizElement.style.height = '820px';
+    var scriptElement = document.createElement('script');
+    scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';
+    vizElement.parentNode.insertBefore(scriptElement, vizElement);
+    </script>
     """
-components.html(SAR_Tableau_Dashboard, width=5000, height=900)
 
 
 SAR_ByStateFiling_Dash = """
@@ -240,15 +264,21 @@ SAR_ByStateFiling_Dash = """
         <script type='text/javascript'>                    
         var divElement = document.getElementById('viz1675874378527');                    
         var vizElement = divElement.getElementsByTagName('object')[0];                    
-            if ( divElement.offsetWidth > 800 ) { vizElement.style.minWidth='420px';vizElement.style.maxWidth='650px';vizElement.style.width='100%';vizElement.style.minHeight='587px';vizElement.style.maxHeight='887px';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';}
-             else if ( divElement.offsetWidth > 500 ) { vizElement.style.minWidth='420px';vizElement.style.maxWidth='650px';vizElement.style.width='100%';vizElement.style.minHeight='587px';vizElement.style.maxHeight='887px';vizElement.style.height=(divElement.offsetWidth*0.75)+'px';}
-              else { vizElement.style.width='100%';vizElement.style.height='727px';}                     
+            vizElement.style.width='100%';
+            vizElement.style.height='820px';
               var scriptElement = document.createElement('script');                    
               scriptElement.src = 'https://public.tableau.com/javascripts/api/viz_v1.js';                    
               vizElement.parentNode.insertBefore(scriptElement, vizElement);
         </script>
         """
-components.html(SAR_ByStateFiling_Dash, width=5000, height=900)
+
+tableau_Col0, tableau_Col1 = st.columns(2, gap="large")
+with tableau_Col0:
+    st.markdown("**SAR Dashboard 1**")
+    components.html(SAR_Tableau_Dashboard, height=860, scrolling=True)
+with tableau_Col1:
+    st.markdown("**SAR Dashboard 2**")
+    components.html(SAR_ByStateFiling_Dash, height=860, scrolling=True)
 
 
 

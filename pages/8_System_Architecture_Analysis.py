@@ -97,19 +97,19 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________phase1___________#
 image1 = Image.open("Data_PNG_JPG_Files/systemdesign1.png")
-st.image(image1, use_column_width="always")
+st.image(image1, width="stretch")
 st.write("""***Figure 1: phase 1*** """)
 # ________phase2___________#
 image2 = Image.open("Data_PNG_JPG_Files/systemdesign2.png")
-st.image(image2, use_column_width="always")
+st.image(image2, width="stretch")
 st.write("""***Figure 2: phase 2*** """)
 # ________phase 3___________#
 image3 = Image.open("Data_PNG_JPG_Files/systemdesign3.png")
-st.image(image3, use_column_width="always")
+st.image(image3, width="stretch")
 st.write("""***Figure 3: phase 3***""")
 # ________phase 4___________#
 image4 = Image.open("Data_PNG_JPG_Files/systemdesign4.png")
-st.image(image4, use_column_width="always")
+st.image(image4, width="stretch")
 st.write("""***Figure 4: phase 4***""")
 "\n"
 # _________________________insert Requirements Modelling ____________________________#
@@ -174,7 +174,7 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________DataFlowDiagram___________#
 image5 = Image.open("Data_PNG_JPG_Files/DataFlowDiagram1.png")
-st.image(image5, use_column_width="always")  # output_format="auto"
+st.image(image5, width="stretch")  # output_format="auto"
 st.write("""***Figure 5: Data Flow Diagram***""")
 "\n"
 # _________________________Insert Data Dictionary body text and Diagrams  ____________________________#
@@ -191,17 +191,17 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________DataDictionary Diagrams(entities)___________#
 image6 = Image.open("Data_PNG_JPG_Files/DataDictionaryDiagram1.png")
-st.image(image6, use_column_width="always")  # output_format="auto"
+st.image(image6, width="stretch")  # output_format="auto"
 st.write("""***Figure 6: Data Dictionary, Entities***""")
 # ________(Process)___________#
 image7 = Image.open("Data_PNG_JPG_Files/DataDictionaryDiagram2.png")  # output_format="auto"
-st.image(image7, use_column_width="always")
+st.image(image7, width="stretch")
 st.write("""***Figure 6.1: Data Dictionary, Process***""")
 # ________(Database)___________#
 image8 = Image.open("Data_PNG_JPG_Files/DataDictionaryDiagram3.png")
-st.image(image8, use_column_width="always")  # output_format="auto"
+st.image(image8, width="stretch")  # output_format="auto"
 image8_1 = Image.open("Data_PNG_JPG_Files/DataDictionaryDiagram4.png")
-st.image(image8_1, use_column_width="always")  # output_format="auto"
+st.image(image8_1, width="stretch")  # output_format="auto"
 st.write("""***Figure 6.2: Data Dictionary, Tables for Database***""")
 "\n"
 # _________________________Insert Use Case body text and Diagrams  ____________________________#
@@ -216,7 +216,7 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________(insert use case diagram)___________#
 image9 = Image.open("Data_PNG_JPG_Files/UseCaseDiagram.png")
-st.image(image9, use_column_width="always")  # output_format="auto"
+st.image(image9, width="stretch")  # output_format="auto"
 st.write("""***Figure 7: Use Case Diagram***""")
 # _________________________Insert Specifications body text and Diagrams  ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>Specifications</h1>",
@@ -255,17 +255,17 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________specification diagram___________#
 image10 = Image.open("Data_PNG_JPG_Files/SpecificationDiagram.png")
-st.image(image10, use_column_width="always")
+st.image(image10, width="stretch")
 st.write("""***Figure 8: Specifications***""")
 # _________________________Insert Data Design Diagrams  ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>Data Design</h1>",
             unsafe_allow_html=True)
 image11 = Image.open("Data_PNG_JPG_Files/DataDesign1.png")
-st.image(image11, use_column_width="always")
+st.image(image11, width="stretch")
 image12 = Image.open("Data_PNG_JPG_Files/DataDesign2.png")
-st.image(image12, use_column_width="always")
+st.image(image12, width="stretch")
 image13 = Image.open("Data_PNG_JPG_Files/DataDesign3.png")
-st.image(image13, use_column_width="always")
+st.image(image13, width="stretch")
 st.write("""***Figure 9: 3NF Chart***""")
 # _________________________Insert Description and Entity Relationship Diagram  ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>Entity Relationship Diagram</h1>",
@@ -278,7 +278,7 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________ERD Diagram___________#
 image14 = Image.open("Data_PNG_JPG_Files/ERD.png")
-st.image(image14, use_column_width="always")
+st.image(image14, width="stretch")
 st.write("""***Figure 10: Entity Relationship Diagram***""")
 # _________________________Insert Description and User Interface Diagram  ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>User Interface Diagram</h1>",
@@ -296,7 +296,7 @@ st.info("""
  """)
 # ________UID Diagram___________#
 image15 = Image.open("Data_PNG_JPG_Files/UserInterfaceDiagram.png")
-st.image(image15, use_column_width="always")
+st.image(image15, width="stretch")
 st.write("""***Figure 11: User Interface Diagram***""")
 # _________________________Insert Body text for System Architecture ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>System Architecture</h1>",
@@ -349,13 +349,13 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________System Mockup Relationship Diagram___________#
 image16 = Image.open("Data_PNG_JPG_Files/SystemMockupRelationships.png")
-st.image(image16, use_column_width="always")
+st.image(image16, width="stretch")
 st.write("""***Figure 12: System Mockup Relationships***""")
 # ________System Mockup Table and Data___________#
 image16 = Image.open("Data_PNG_JPG_Files/SystemMockupRelationships2.png")
-st.image(image16, use_column_width="always")
+st.image(image16, width="stretch")
 image17 = Image.open("Data_PNG_JPG_Files/SystemMockupRelationships3.png")
-st.image(image17, use_column_width="always")
+st.image(image17, width="stretch")
 st.write("""***Figure 13: System Mockup Related Tables & Data Type***""")
 # _________________________Insert Body text and Diagram for System Mockup: Six Queries Utilizing Relating Tables ____________________________#
 st.markdown(
@@ -372,9 +372,9 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________System Mockup Queries___________#
 image18 = Image.open("Data_PNG_JPG_Files/SystemMockupQueries1.png")
-st.image(image18, use_column_width="always")
+st.image(image18, width="stretch")
 image19 = Image.open("Data_PNG_JPG_Files/SystemMockupQueries2.png")
-st.image(image19, use_column_width="always")
+st.image(image19, width="stretch")
 st.write("""***Figure 14: System Mockup Six Queries***""")
 # _________________________Insert Body text and Diagram for System Mockup: Four Forms ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>System Mockup: Four Forms</h1>",
@@ -388,9 +388,9 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________Four Form Diagram___________#
 image20 = Image.open("Data_PNG_JPG_Files/SystemMockup4Form1.png")
-st.image(image20, use_column_width="always")
+st.image(image20, width="stretch")
 image21 = Image.open("Data_PNG_JPG_Files/SystemMockup4Form2.png")
-st.image(image21, use_column_width="always")
+st.image(image21, width="stretch")
 st.write("""***Figure 15: System Mockup Four Forms***""")
 # _________________________Insert Body text and Diagram for System Mockup: Four Reports ____________________________#
 st.markdown("<h1 style='text-align: center; color: white; font-size: 120%'>System Mockup: Four Reports</h1>",
@@ -411,9 +411,9 @@ st.write("<div style='text-align:justify'>""\n"
 "\n"
 # ________Four Reports Diagram___________#
 image22 = Image.open("Data_PNG_JPG_Files/SystemMockup4Reports1.png")
-st.image(image22, use_column_width="always")
+st.image(image22, width="stretch")
 image23 = Image.open("Data_PNG_JPG_Files/SystemMockup4Reports2.png")
-st.image(image23, use_column_width="always")
+st.image(image23, width="stretch")
 st.write("""***Figure 16: System Mockup Four Reports***""")
 # _________________________Insert expander Button for References ____________________________#
 references_expander = st.expander(label="Expand for References")

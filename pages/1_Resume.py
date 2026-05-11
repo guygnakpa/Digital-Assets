@@ -18,6 +18,7 @@ import statsmodels.api as sm
 # import webbrowser
 import openpyxl as xls
 import datetime
+import base64
 from Utilities.Navigation import render_sidebar, hide_streamlit_nav
 # _____________________________________________________________
 st.set_page_config(page_title=" Digital Assets | Resume", layout="wide")
@@ -39,40 +40,49 @@ render_sidebar("Resume")
 #st.title("Resume")
 
 # _____________________________________________________________
-st.markdown("<h1 style='text-align: center; color: white;'>""Guy L. Gnakpa""</h1>", unsafe_allow_html=True)
-
 Space_col1, Space_col2, Space_col3 = st.columns([1,2,1])
 with Space_col1:
-    st.markdown("<h1 style='text-align: center; color: white;'>"" ""</h1>", unsafe_allow_html=True)
-    image0 = Image.open("Data_PNG_JPG_Files/IMG_2675.JPG")
-    st.image(image0, width=250)
-
-with Space_col2:
+    with open("Data_PNG_JPG_Files/IMG_2675.JPG", "rb") as profile_image:
+        profile_image_base64 = base64.b64encode(profile_image.read()).decode()
     st.markdown(
-        """
-        <div style="text-align: center;">
-            <a href="https://www.linkedin.com/in/guy-gnakpa/"
-               target="_blank"
-               style="font-size:20px; text-decoration:none; color:#0077B5; font-weight:600;">
-               🔗 Connect on LinkedIn
-            </a>
+        f"""
+        <div style="display:flex; justify-content:center;">
+            <img
+                src="data:image/jpeg;base64,{profile_image_base64}"
+                style="
+                    width:215px;
+                    height:215px;
+                    border-radius:50%;
+                    object-fit:cover;
+                    border:3px solid rgba(255,255,255,0.85);
+                    box-shadow:0 4px 18px rgba(0,0,0,0.35);
+                "
+                alt="Guy L. Gnakpa profile picture"
+            />
         </div>
         """,
         unsafe_allow_html=True
     )
-
     st.markdown(
         """
-        <div style="text-align: center;">
+        <div style="text-align: center; margin-top: 10px;">
+            <h1 style="color: white; font-size: 185%; margin-bottom: 8px;">Guy L. Gnakpa</h1>
+            <a href="https://www.linkedin.com/in/guy-gnakpa/"
+               target="_blank"
+               style="font-size:13px; text-decoration:none; color:#0077B5; font-weight:600; margin-right: 14px;">
+               🔗 Connect on LinkedIn
+            </a>
             <a href="https://github.com/guygnakpa"
                target="_blank"
-               style="font-size:20px; text-decoration:none; color:#0077B5; font-weight:600;">
+               style="font-size:13px; text-decoration:none; color:#0077B5; font-weight:600;">
                🔗 Connect on Github
             </a>
         </div>
         """,
         unsafe_allow_html=True
     )
+with Space_col2:
+    " "
 with Space_col3:
     " "
 
@@ -112,6 +122,7 @@ with Space_col3:
             st.markdown(c)
 
 # # ###--------------------------------------------------------------##
+st.markdown("<div style='height: 28px;'></div>", unsafe_allow_html=True)
 st.markdown("## Profile", unsafe_allow_html=True)
 st.info("""A goal-oriented and collaborative professional with years of experience in financial services.
     Hand on experience with non-financial risk data analysis, digital assets analysis, fund management and administration for alternative assets in investment banking. Holds a

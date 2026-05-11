@@ -1198,7 +1198,8 @@ def get_bond_market_caps(tickers):
         try:
             # Let yfinance handle the session internally (requires curl_cffi installed)
             ticker_obj = yf.Ticker(t)
-            caps[t] = ticker_obj.info.get("marketCap")
+            info = ticker_obj.info
+            caps[t] = info.get("totalAssets") or info.get("marketCap")
         except Exception as e:
             st.warning(f"Could not pull data for {t}: {e}")
             caps[t] = None
@@ -1213,24 +1214,25 @@ with st.spinner("Fetching data using curl_cffi..."):
     market_cap_dict = get_bond_market_caps(bond_etfs)
 
 # Prep Dataframe
-market_cap = pd.Series(market_cap_dict, name="marketCap")
+market_cap = pd.Series(market_cap_dict, name="AUM")
 Bond_MrkCap = pd.DataFrame(market_cap).dropna()
-Bond_MrkCap = Bond_MrkCap.sort_values(by="marketCap", ascending=False).reset_index()
-Bond_MrkCap.columns = ['Ticker', 'marketCap']
+Bond_MrkCap = Bond_MrkCap.sort_values(by="AUM", ascending=False).reset_index()
+Bond_MrkCap.columns = ['Ticker', 'AUM']
 
 # Visualization
 if not Bond_MrkCap.empty:
     Bond_MrkCap_fig = px.bar(
         Bond_MrkCap,
         x="Ticker",
-        y="marketCap",
+        y="AUM",
         color="Ticker",
-        title="Market Capitalization | Bond ETFs",
+        title="Assets Under Management (AUM) | Bond ETFs",
+        labels={"AUM": "Assets Under Management (USD)"},
         template="plotly_white"
     )
     st.plotly_chart(Bond_MrkCap_fig)
 else:
-    st.error("No data available to display.")
+    st.error("No bond ETF asset data available to display.")
 
 # _______________________________________________________________________
 BOND_ETF_COLA, BOND_ETF_COLB = st.columns(2, border=True)
