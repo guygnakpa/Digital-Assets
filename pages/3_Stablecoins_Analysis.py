@@ -181,13 +181,17 @@ def API_Data_Top():
 Top_Stablecoins_response = API_Data_Top()
 # store and display return of function as a dataframe \ clean: Drop columns \ print new dataframe
 Top_Stablecoins_df = pd.DataFrame(Top_Stablecoins_response)
-Top_Stablecoins_New_df = Top_Stablecoins_df.drop(
-    columns=["id", "image", "symbol", "market_cap_rank", "fully_diluted_valuation", "roi", "ath_change_percentage",
-             "last_updated", "atl", "ath_date", "atl_date", "ath", "atl_change_percentage", "max_supply",
-             "price_change_percentage_24h", "market_cap_change_24h", "price_change_24h",
-             "market_cap_change_percentage_24h"
-             ],
-    axis=0)
+if Top_Stablecoins_df.empty:
+    Top_Stablecoins_New_df = pd.DataFrame(columns=["name", "market_cap"])
+else:
+    Top_Stablecoins_New_df = Top_Stablecoins_df.drop(
+        columns=["id", "image", "symbol", "market_cap_rank", "fully_diluted_valuation", "roi", "ath_change_percentage",
+                 "last_updated", "atl", "ath_date", "atl_date", "ath", "atl_change_percentage", "max_supply",
+                 "price_change_percentage_24h", "market_cap_change_24h", "price_change_24h",
+                 "market_cap_change_percentage_24h"
+                 ],
+        axis=1,
+        errors="ignore")
 st.dataframe(Top_Stablecoins_New_df)
 # insert figure button
 TopStablecoin_button = st.expander(label="figure 1.0 : Top Stablecoins Dataset")
@@ -229,7 +233,7 @@ Algo_MktCap = Algo_Backed_New_df["market_cap"].sum()
 # ____________________Create a Dataframe for the Calculated MarketCap _____________#
 Category_MarketCap = {"StablecoinCategory": ["Fiat-backed Stablecoins", "Commodity-backed Stablecoins",
                                              "Crypto-backed Stablecoins", "Algorithmic-backed Stablecoins"],
-                      "MarketCapitalization": [Fiat_MktCap, Algo_MktCap, Crypto_MktCap, Commodity_MktCap]}
+                      "MarketCapitalization": [Fiat_MktCap, Commodity_MktCap, Crypto_MktCap, Algo_MktCap]}
 Category_MarketCap_df = pd.DataFrame(Category_MarketCap)  # .sort_index(ascending=False)
 # st.dataframe(Category_MarketCap_df)
 # ________________________________________________Using plotly display bar charts______________________________________#
@@ -742,158 +746,138 @@ st.write("<div style='text-align:justify'>""\n"
 
 #                              _________Call API for TerraUSD and Terra Luna___________
 # CallAPI/Select the needed columns
-
-@st.cache_data(ttl=86400)  # 24h cache
-def _cg_market_chart_365(coin_id: str):
-    cg = CoinGeckoAPI()
-
-    last_err = None
-    for wait_s in (1, 3, 7):
-        try:
-            data = cg.get_coin_market_chart_by_id(
-                id=coin_id,
-                vs_currency="usd",
-                days=365
-            )
-            return data
-        except Exception as e:
-            last_err = e
-            msg = str(e)
-            if "429" in msg or "Too Many Requests" in msg:
-                time.sleep(wait_s)
-                continue
-            break
-
-    st.warning(f"CoinGecko request failed for {coin_id} (rate-limited or unavailable).")
-    return {"prices": [], "total_volumes": []}
+TERRA_START_DATE = pd.Timestamp("2021-01-01")
+TERRA_END_DATE = pd.Timestamp("2022-12-31")
 
 
-# ---------------------- TerraUSD ----------------------
-
-@st.cache_data(ttl=86400)
-def API_TerraUSD():
-    TerraUSD_history = _cg_market_chart_365("USTC")
-
-    TerraUSD_history_DF = pd.DataFrame(
-        TerraUSD_history.get("total_volumes", []),
-        columns=["Timestamp", "TerraUSD Volume"]
+def _get_coingecko_secret():
+    secret_options = (
+        ("pro", "COINGECKO_API_KEY"),
+        ("pro", "coingecko_api_key"),
+        ("demo", "COINGECKO_DEMO_API_KEY"),
+        ("demo", "coingecko_demo_api_key"),
     )
 
-    if TerraUSD_history_DF.empty:
-        return TerraUSD_history_DF
+    for key_type, key_name in secret_options:
+        try:
+            key_value = st.secrets.get(key_name)
+        except Exception:
+            key_value = None
 
-    # Convert timestamp
-    TerraUSD_history_DF["Timestamp"] = pd.to_datetime(
-        TerraUSD_history_DF["Timestamp"], unit="ms"
+        if key_value:
+            return key_type, key_value
+
+    return None, None
+
+
+COINGECKO_KEY_TYPE, COINGECKO_KEY_VALUE = _get_coingecko_secret()
+
+
+@st.cache_data(ttl=86400)
+def _cg_market_chart_range(coin_id, start_ts, end_ts, api_key_type=None, api_key_value=None):
+    headers = {}
+    base_url = "https://api.coingecko.com/api/v3"
+
+    if api_key_value and api_key_type == "pro":
+        base_url = "https://pro-api.coingecko.com/api/v3"
+        headers["x-cg-pro-api-key"] = api_key_value
+    elif api_key_value and api_key_type == "demo":
+        headers["x-cg-demo-api-key"] = api_key_value
+
+    url = f"{base_url}/coins/{coin_id}/market_chart/range"
+    params = {
+        "vs_currency": "usd",
+        "from": start_ts,
+        "to": end_ts,
+    }
+
+    try:
+        response = r.get(url, params=params, headers=headers, timeout=20)
+        response.raise_for_status()
+        return response.json()
+    except Exception:
+        return {"prices": [], "total_volumes": []}
+
+
+def _coingecko_daily_frame(chart_data, data_key, value_column):
+    daily_df = pd.DataFrame(chart_data.get(data_key, []), columns=["Timestamp", value_column])
+
+    if daily_df.empty:
+        return pd.DataFrame(columns=["Timestamp", value_column])
+
+    daily_df["Timestamp"] = pd.to_datetime(daily_df["Timestamp"], unit="ms").dt.date
+    daily_df = daily_df.groupby("Timestamp", as_index=False)[value_column].mean()
+    return daily_df
+
+
+@st.cache_data(ttl=86400)
+def _yahoo_terra_history(ticker, value_column, source_column, start_date, end_date):
+    yahoo_df = yf.download(
+        ticker,
+        start=start_date,
+        end=end_date,
+        auto_adjust=False,
+        progress=False,
     )
 
-    # Apply date filter
-    start_date = pd.Timestamp("2020-01-01")
-    end_date = pd.Timestamp("2022-12-31")
+    if yahoo_df is None or yahoo_df.empty:
+        return pd.DataFrame(columns=["Timestamp", value_column])
 
-    TerraUSD_history_DF = TerraUSD_history_DF[
-        (TerraUSD_history_DF["Timestamp"] >= start_date) &
-        (TerraUSD_history_DF["Timestamp"] <= end_date)
-    ]
+    if isinstance(yahoo_df.columns, pd.MultiIndex):
+        yahoo_df.columns = yahoo_df.columns.get_level_values(0)
 
-    return TerraUSD_history_DF
+    if source_column not in yahoo_df.columns:
+        return pd.DataFrame(columns=["Timestamp", value_column])
 
-
-TerraUSD_history_DF = API_TerraUSD()
-
-
-# ---------------------- Terra Luna ----------------------
-
-@st.cache_data(ttl=86400)  # 24h cache
-def _cg_market_chart_365(coin_id: str):
-    cg = CoinGeckoAPI()  # call the coingecko API
-
-    last_err = None
-    for wait_s in (1, 3, 7):  # light retry/backoff
-        try:
-            data = cg.get_coin_market_chart_by_id(id=coin_id, vs_currency="usd", days=365)
-            return data
-        except Exception as e:
-            last_err = e
-            msg = str(e)
-            if "429" in msg or "Too Many Requests" in msg:
-                time.sleep(wait_s)
-                continue
-            break
-
-    st.warning(f"CoinGecko request failed for {coin_id} (rate-limited or unavailable).")
-    return {"prices": [], "total_volumes": []}
+    yahoo_df = yahoo_df.reset_index()
+    yahoo_df["Timestamp"] = pd.to_datetime(yahoo_df["Date"]).dt.date
+    yahoo_df = yahoo_df[["Timestamp", source_column]].rename(columns={source_column: value_column})
+    return yahoo_df.dropna(subset=[value_column])
 
 
-@st.cache_data(ttl=86400)
-def API_TerraUSD():
-    TerraUSD_history = _cg_market_chart_365("terrausd")
-    TerraUSD_history_DF = pd.DataFrame(TerraUSD_history.get("total_volumes", []))
-    TerraUSD_history_DF = TerraUSD_history_DF.rename(columns={0: "Timestamp", 1: "TerraUSD Volume"})
-    return TerraUSD_history_DF
+def _terra_coingecko_data():
+    start_ts = int(TERRA_START_DATE.timestamp())
+    end_ts = int((TERRA_END_DATE + pd.Timedelta(days=1)).timestamp())
+
+    terrausd_history = _cg_market_chart_range(
+        "terrausd",
+        start_ts,
+        end_ts,
+        COINGECKO_KEY_TYPE,
+        COINGECKO_KEY_VALUE,
+    )
+    terra_luna_history = _cg_market_chart_range(
+        "terra-luna",
+        start_ts,
+        end_ts,
+        COINGECKO_KEY_TYPE,
+        COINGECKO_KEY_VALUE,
+    )
+
+    terrausd_df = _coingecko_daily_frame(terrausd_history, "total_volumes", "TerraUSD Volume")
+    terra_luna_df = _coingecko_daily_frame(terra_luna_history, "prices", "Terra Luna Price")
+
+    return pd.merge(terrausd_df, terra_luna_df, on="Timestamp", how="inner")
 
 
-TerraUSD_history_DF = API_TerraUSD()
+def _terra_yahoo_fallback_data():
+    start_date = TERRA_START_DATE.strftime("%Y-%m-%d")
+    end_date = (TERRA_END_DATE + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+
+    terrausd_df = _yahoo_terra_history("USTC-USD", "TerraUSD Volume", "Volume", start_date, end_date)
+    terra_luna_df = _yahoo_terra_history("LUNC-USD", "Terra Luna Price", "Close", start_date, end_date)
+
+    return pd.merge(terrausd_df, terra_luna_df, on="Timestamp", how="inner")
 
 
-@st.cache_data(ttl=86400)
-def API_TerraLuna():
-    TerraLuna_history = _cg_market_chart_365("terra-luna")
-    TerraLuna_history_DF = pd.DataFrame(TerraLuna_history.get("prices", []))
-    TerraLuna_history_DF = TerraLuna_history_DF.rename(columns={0: "Timestamp", 1: "Terra Luna Price"})
-    return TerraLuna_history_DF
+UST_LUNA_DF = _terra_coingecko_data()
 
-
-TerraLuna_history_DF = API_TerraLuna()
-
-# Combine Tables (robust merge on Timestamp)
-UST_LUNA_DF = pd.merge(
-    TerraUSD_history_DF,
-    TerraLuna_history_DF[["Timestamp", "Terra Luna Price"]],
-    on="Timestamp",
-    how="left"
-)
-
-UST_LUNA_DF["Timestamp"] = pd.to_datetime(UST_LUNA_DF["Timestamp"], unit="ms").dt.date
-
-##############################################################################
-##############################################################################
-##############################################################################
-# @st.cache_data(ttl=86400)
-# def API_TerraUSD():
-#     cg = CoinGeckoAPI()  # call the coingecko API
-#     TerraUSD_history = cg.get_coin_market_chart_by_id(id="terrausd", vs_currency="usd", days=365)
-#     TerraUSD_history_DF = pd.DataFrame(TerraUSD_history["total_volumes"])
-#     TerraUSD_history_DF = TerraUSD_history_DF.rename(columns={0: "Timestamp", 1: "TerraUSD Volume"})
-#     return TerraUSD_history_DF
-#
-#
-# TerraUSD_history_DF = API_TerraUSD()
-#
-#
-# @st.cache_data(ttl=86400)
-# def API_TerraLuna():
-#     cg = CoinGeckoAPI()  # call the coingecko API
-#     TerraLuna_history = cg.get_coin_market_chart_by_id(id="terra-luna", vs_currency="usd", days=365)
-#     TerraLuna_history_DF = pd.DataFrame(TerraLuna_history["prices"])
-#     TerraLuna_history_DF = TerraLuna_history_DF.rename(columns={0: "Timestamp", 1: "Terra Luna Price"})
-#     return TerraLuna_history_DF
-#
-#
-# TerraLuna_history_DF = API_TerraLuna()
-#
-# # Combine Tables
-# UST_LUNA_DF = TerraUSD_history_DF
-# UST_LUNA_DF["Terra Luna Price"] = TerraLuna_history_DF[["Terra Luna Price"]]
-# UST_LUNA_DF["Timestamp"] = pd.to_datetime(UST_LUNA_DF["Timestamp"], unit="ms").dt.date
-##############################################################################
-##############################################################################
-##############################################################################
-
+if UST_LUNA_DF.empty or UST_LUNA_DF[["TerraUSD Volume", "Terra Luna Price"]].dropna().empty:
+    UST_LUNA_DF = _terra_yahoo_fallback_data()
 
 #                              _____________Insert line graph of TerraUST/Luna___________
 UST_DF_PLOT = px.line(UST_LUNA_DF, x="Timestamp", y=["TerraUSD Volume"],
-                      title="TerraUSD Volume")
+                      title="TerraUSD Volume: Jan 2021-Dec 2022")
 UST_DF_PLOT.update_layout(legend_title="Digital Asset", width=1300, height=450, title_x=0.5, title_y=.85,
                           plot_bgcolor='rgba(0,0,0,0)')
 UST_DF_PLOT.update_xaxes(showgrid=False, title="Date")
@@ -901,7 +885,7 @@ UST_DF_PLOT.update_yaxes(showgrid=True, title="Daily Volume($)")
 st.plotly_chart(UST_DF_PLOT)
 
 LUNA_DF_PLOT2 = px.line(UST_LUNA_DF, x="Timestamp", y=["Terra Luna Price"],
-                        title="Terra Luna Price")
+                        title="Terra Luna Price: Jan 2021-Dec 2022")
 LUNA_DF_PLOT2.update_layout(legend_title="Digital Asset", width=1300, height=450, title_x=0.5, title_y=.85,
                             plot_bgcolor='rgba(0,0,0,0)')
 LUNA_DF_PLOT2.update_xaxes(showgrid=False, title="Date")
@@ -932,13 +916,13 @@ st.write("<div style='text-align:justify'>""\n"
 # insert figure button
 SLReg_button = st.expander(label="Figure 5.0 - 5.1A : TerraUSD Volume & Terra Luna Volume")
 SLReg_button.write("""
-Figure 5.0: TerraUSD Volume
+Figure 5.0: TerraUSD Volume from Jan 2021-Dec 2022
 
-Figure 5.1A: Terra Luna Volume
+Figure 5.1A: Terra Luna Price from Jan 2021-Dec 2022
 
-Datasource: CoingeckoAPI
+Datasource: CoinGeckoAPI when available. Falls back to Yahoo Finance USTC-USD volume and LUNC-USD close when CoinGecko is rate-limited or unavailable.
 
-Technologies: PyCharm, CoingeckoApi, Python; plotly express, pandas, streamlit""")
+Technologies: PyCharm, CoingeckoApi, Yahoo Finance, Python; plotly express, pandas, streamlit""")
 
 st.info("REFERENCES")
 
