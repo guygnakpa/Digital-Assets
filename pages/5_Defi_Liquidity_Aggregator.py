@@ -4,8 +4,6 @@ import requests as r
 import babel.numbers
 from PIL import Image
 from sklearn.impute import KNNImputer
-from Utilities.Navigation import render_sidebar
-from pycoingecko import CoinGeckoAPI
 import streamlit.components.v1 as components
 import pandas_datareader as pdr
 import pandas as pd
@@ -18,7 +16,114 @@ import statsmodels.api as sm
 # import webbrowser
 import openpyxl as xls
 import datetime
+import hashlib
+import json
+import os
+import time
+from pathlib import Path
+
 from Utilities.Navigation import render_sidebar, hide_streamlit_nav
+
+# --- CoinGecko / offline resilience (paths relative to Digital Assets project root) ---
+_DATA_ROOT = Path(__file__).resolve().parent.parent / "data"
+_CACHE_DIR = _DATA_ROOT / "cache"
+_MARKETS_SNAPSHOT = _CACHE_DIR / "coingecko_defi_markets.json"
+_CATEGORIES_SNAPSHOT = _CACHE_DIR / "coingecko_categories.json"
+_FALLBACK_MARKETS_CSV = _DATA_ROOT / "defi_coingecko_markets_fallback.csv"
+_FALLBACK_CATEGORIES_CSV = _DATA_ROOT / "defi_coingecko_categories_fallback.csv"
+
+
+def _coingecko_key_and_pro() -> tuple[str, bool]:
+    key = (os.environ.get("COINGECKO_API_KEY") or "").strip()
+    pro = str(os.environ.get("COINGECKO_PRO", "")).lower() in ("1", "true", "yes")
+    if not key:
+        try:
+            key = (st.secrets.get("COINGECKO_API_KEY", "") or "").strip()
+            pro = str(st.secrets.get("COINGECKO_PRO", "false")).lower() in ("1", "true", "yes")
+        except Exception:
+            pass
+    return key, pro
+
+
+def _coingecko_key_sig() -> str:
+    key, pro = _coingecko_key_and_pro()
+    return hashlib.sha256(f"{key}:{pro}".encode()).hexdigest()[:16]
+
+
+def _coingecko_base_and_headers() -> tuple[str, dict[str, str]]:
+    key, pro = _coingecko_key_and_pro()
+    if key:
+        if pro:
+            return "https://pro-api.coingecko.com/api/v3", {"x-cg-pro-api-key": key}
+        return "https://api.coingecko.com/api/v3", {"x-cg-demo-api-key": key}
+    return "https://api.coingecko.com/api/v3", {}
+
+
+def _http_get_json(url: str, headers: dict[str, str], max_attempts: int = 6):
+    """GET JSON with exponential backoff on rate-limit / transient errors."""
+    merged = {**headers, "Accept": "application/json"}
+    for attempt in range(max_attempts):
+        try:
+            resp = r.get(url, headers=merged, timeout=40)
+            if resp.status_code == 200:
+                return resp.json()
+            if resp.status_code in (429, 418, 503, 502, 504):
+                time.sleep(min(45.0, 1.85 ** attempt))
+                continue
+            # Other 4xx/5xx: brief backoff then fail out
+            if 400 <= resp.status_code < 500:
+                return None
+            resp.raise_for_status()
+        except r.exceptions.RequestException:
+            time.sleep(min(25.0, 1.6 ** attempt))
+    return None
+
+
+def _normalize_markets_rows(rows: list) -> pd.DataFrame:
+    if not rows:
+        return pd.DataFrame()
+    df = pd.json_normalize(rows)
+    df = pd.DataFrame(df)
+    return df.drop(columns=["id", "symbol", "image", "roi", "last_updated"], errors="ignore")
+
+
+def _load_json_list(path: Path) -> list | None:
+    try:
+        if not path.is_file():
+            return None
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else None
+    except Exception:
+        return None
+
+
+def _save_json_list(path: Path, rows: list) -> None:
+    try:
+        _CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(rows), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def _surrogate_markets_from_llama_protocols(protocol_df: pd.DataFrame) -> pd.DataFrame:
+    """When CoinGecko is unavailable, approximate token-style series from DefiLlama protocols."""
+    if protocol_df is None or protocol_df.empty or "name" not in protocol_df.columns:
+        return pd.DataFrame()
+    ll = protocol_df.copy()
+    if "tvl" not in ll.columns:
+        return pd.DataFrame()
+    ll = ll.sort_values("tvl", ascending=False).head(50)
+    out = pd.DataFrame(
+        {
+            "name": ll["name"],
+            "current_price": np.nan,
+            "market_cap": ll["mcap"] if "mcap" in ll.columns else np.nan,
+            "total_volume": ll["tvl"],
+            "circulating_supply": np.nan,
+            "total_supply": np.nan,
+        }
+    )
+    return out.fillna(0.0)
 # _____________________________________________________________
 st.set_page_config(page_title=" Digital Assets | Defi Liquidity Aggregator", layout="wide")
 hide_streamlit_nav()
@@ -93,61 +198,103 @@ Protocol_response_Df2 = Protocol_API()
 ###############################################################################################################
 ###############################################################################################################
 ###############################################################################################################
-@st.cache_data(ttl=86400)  # cache for 24 hours
-def DeFi_Data_API():
-    cg = CoinGeckoAPI()
+@st.cache_data(ttl=7200)
+def _cached_coingecko_defi_bundle(key_sig: str) -> tuple[pd.DataFrame, pd.DataFrame, dict]:
+    """Categories + DeFi markets from CoinGecko with retries, disk snapshots, and bundled CSV fallbacks (no Streamlit UI)."""
+    meta: dict = {
+        "categories_live": False,
+        "markets_live": False,
+        "categories_from": "",
+        "markets_from": "",
+    }
+    base, headers = _coingecko_base_and_headers()
 
-    # --- 1) Categories (CoinGecko client) ---
-    try:
-        DeFi_Categ = cg.get_coins_categories()
-        DeFi_categ0 = pd.DataFrame(DeFi_Categ)
-    except Exception as e:
-        st.warning("CoinGecko Categories request was rate-limited or temporarily unavailable.")
-        DeFi_categ0 = pd.DataFrame()
+    cat_rows = _http_get_json(f"{base}/coins/categories", headers)
+    DeFi_categ0 = pd.DataFrame(cat_rows) if cat_rows else pd.DataFrame()
+    if not DeFi_categ0.empty:
+        meta["categories_live"] = True
+        meta["categories_from"] = "coingecko"
+        if isinstance(cat_rows, list):
+            _save_json_list(_CATEGORIES_SNAPSHOT, cat_rows)
+    else:
+        snap = _load_json_list(_CATEGORIES_SNAPSHOT)
+        if snap:
+            DeFi_categ0 = pd.DataFrame(snap)
+            meta["categories_from"] = "disk_snapshot"
+        elif _FALLBACK_CATEGORIES_CSV.is_file():
+            DeFi_categ0 = pd.read_csv(_FALLBACK_CATEGORIES_CSV)
+            meta["categories_from"] = "bundled_csv"
 
-    # --- 2) DeFi coins/markets (HTTP request) ---
-    try:
-        DeFi_Categ_response = r.get(
-            "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&category=decentralized-finance-defi&order=market_cap_desc&per_page=200&page=1&sparkline=false",
-            timeout=20
-        )
-        DeFi_Categ_response.raise_for_status()
-        DeFi_Categ3 = DeFi_Categ_response.json()
+    markets_url = (
+        f"{base}/coins/markets?vs_currency=usd&category=decentralized-finance-defi"
+        "&order=market_cap_desc&per_page=250&page=1&sparkline=false"
+    )
+    m_rows = _http_get_json(markets_url, headers)
+    DeFi_Categ3_Norm = _normalize_markets_rows(m_rows) if m_rows else pd.DataFrame()
+    if not DeFi_Categ3_Norm.empty and "name" in DeFi_Categ3_Norm.columns:
+        meta["markets_live"] = True
+        meta["markets_from"] = "coingecko"
+        if isinstance(m_rows, list):
+            _save_json_list(_MARKETS_SNAPSHOT, m_rows)
+    else:
+        snap = _load_json_list(_MARKETS_SNAPSHOT)
+        if snap:
+            DeFi_Categ3_Norm = _normalize_markets_rows(snap)
+            meta["markets_from"] = "disk_snapshot"
+        if (DeFi_Categ3_Norm.empty or "name" not in DeFi_Categ3_Norm.columns) and _FALLBACK_MARKETS_CSV.is_file():
+            DeFi_Categ3_Norm = pd.read_csv(_FALLBACK_MARKETS_CSV)
+            meta["markets_from"] = "bundled_csv"
 
-        DeFi_Categ3_Norm = pd.json_normalize(DeFi_Categ3)
-        DeFi_Categ3_Norm = pd.DataFrame(DeFi_Categ3_Norm)
-        DeFi_Categ3_Norm = DeFi_Categ3_Norm.drop(
-            columns=["id", "symbol", "image", "roi", "last_updated"],
-            errors="ignore"
-        )
-    except Exception as e:
-        st.warning("CoinGecko DeFi markets request was rate-limited or temporarily unavailable.")
-        DeFi_Categ3_Norm = pd.DataFrame()
-
-    return DeFi_categ0, DeFi_Categ3_Norm
+    return DeFi_categ0, DeFi_Categ3_Norm, meta
 
 
-# Call once
-DeFi_categ0, DeFi_Categ3_Norm = DeFi_Data_API()
+DeFi_categ0, DeFi_Categ3_Norm, _cg_meta = _cached_coingecko_defi_bundle(_coingecko_key_sig())
 
+# Ensure category frame has columns expected by ecosystem chart
+_required_cat = {"name", "market_cap", "market_cap_change_24h", "volume_24h"}
+if not DeFi_categ0.empty and not _required_cat.issubset(DeFi_categ0.columns):
+    DeFi_categ0 = pd.DataFrame()
+if DeFi_categ0.empty and _FALLBACK_CATEGORIES_CSV.is_file():
+    DeFi_categ0 = pd.read_csv(_FALLBACK_CATEGORIES_CSV)
+
+if _cg_meta.get("markets_from") and _cg_meta["markets_from"] != "coingecko":
+    st.info(
+        "CoinGecko DeFi markets hit a rate limit or error. Showing **"
+        + _cg_meta["markets_from"].replace("_", " ")
+        + "** data so charts stay usable. Add **COINGECKO_API_KEY** (optional **COINGECKO_PRO=true** for Pro) in "
+        "`.streamlit/secrets.toml` or your environment for higher limits."
+    )
+elif not _cg_meta.get("markets_live") and not DeFi_Categ3_Norm.empty:
+    st.info("Using offline or cached CoinGecko token snapshot. Configure a CoinGecko API key for live data.")
+
+if _cg_meta.get("categories_from") and _cg_meta["categories_from"] != "coingecko" and not DeFi_categ0.empty:
+    st.info("Ecosystem category table uses a **cached or offline** CoinGecko snapshot.")
 
 # ---- keep your existing downstream logic ----
-
 if not DeFi_categ0.empty:
     Defi_MrkCap = pd.DataFrame(
         DeFi_categ0[["name", "market_cap", "market_cap_change_24h", "volume_24h"]]
     )
-    # keep your row selection, but guard index
     Defi_Metric = Defi_MrkCap.loc[[13], :] if 13 in Defi_MrkCap.index else pd.DataFrame()
 else:
     Defi_MrkCap = pd.DataFrame()
     Defi_Metric = pd.DataFrame()
 
-
-# Guard before plotting to prevent: Expected one of [] but received: name
+# Live DefiLlama substitute when CoinGecko token rows are still unavailable
 if DeFi_Categ3_Norm.empty or "name" not in DeFi_Categ3_Norm.columns:
-    st.warning("DeFi market data is unavailable (rate-limited/cached empty). Try again later.")
-    st.stop()
+    DeFi_Categ3_Norm = _surrogate_markets_from_llama_protocols(Protocol_response_Df2)
+    if not DeFi_Categ3_Norm.empty:
+        st.info(
+            "CoinGecko token series unavailable. Showing **top protocols by TVL** from DefiLlama "
+            "(TVL used in place of volume where needed) so the liquidity chart remains available."
+        )
+
+if DeFi_Categ3_Norm.empty or "name" not in DeFi_Categ3_Norm.columns:
+    if _FALLBACK_MARKETS_CSV.is_file():
+        DeFi_Categ3_Norm = pd.read_csv(_FALLBACK_MARKETS_CSV)
+
+if DeFi_Categ3_Norm.empty or "name" not in DeFi_Categ3_Norm.columns:
+    st.warning("DeFi token chart data could not be loaded. Other sections below may still work.")
 ###############################################################################################################
 # @st.cache_data(ttl=86400)  # cache for 6 hours to reduce 429 rate-limit errors
 # def Categories_API():
@@ -215,8 +362,12 @@ st.write("---")
 # ________________________________________Insert Metrics in three Columns _____________________________________________________
 TVL_Metric = Defi_Chains_Df[["tvl"]].sum()
 TVL_MetricUSD = babel.numbers.format_currency(float(TVL_Metric), "USD", locale='en_US')
-Defi_MRKCAP_Metric = Defi_Metric[["market_cap"]].sum()
-Defi_MRKCAP_MetricUSD = babel.numbers.format_currency(float(Defi_MRKCAP_Metric), "USD", locale="en_US")
+if not Defi_Metric.empty and "market_cap" in Defi_Metric.columns:
+    mcap_sum = float(Defi_Metric["market_cap"].sum())
+    Defi_MRKCAP_MetricUSD = babel.numbers.format_currency(mcap_sum, "USD", locale="en_US")
+else:
+    mcap_sum = 0.0
+    Defi_MRKCAP_MetricUSD = "N/A (ecosystem data unavailable)"
 ETH_Ratio_Metric = ETH_Ratio[["tvl"]].sum()
 
 TVL_col2, HR24_Change_col, ChainDominance_col1, Defi_ETH_Ratio_col = st.columns(4)
@@ -225,7 +376,11 @@ with TVL_col2:
 with HR24_Change_col:
     st.metric("DeFi TOTAL MARKETCAP", Defi_MRKCAP_MetricUSD)
 with ChainDominance_col1:
-    ratio_metric = format((Defi_MRKCAP_Metric[0] / TVL_Metric[0]), ".2f")
+    tvl_total = float(TVL_Metric.iloc[0]) if hasattr(TVL_Metric, "iloc") else float(TVL_Metric)
+    if tvl_total > 0 and mcap_sum > 0:
+        ratio_metric = format(mcap_sum / tvl_total, ".2f")
+    else:
+        ratio_metric = "N/A"
     st.metric("MARKETCAP / TVL (ratio)", ratio_metric)
 with Defi_ETH_Ratio_col:
     ETH_Ratio_Metric = (ETH_Ratio_Metric[0] / TVL_Metric[0])
@@ -271,22 +426,34 @@ for category in sorted(Protocol_response_Df2["category"].dropna().unique()):
         available_category_frames[_display_category_name(category)] = (category, category_df)
 
 # _________________________________________ETHEREUM VS OTHER ECOSYSTEMS__________________________________________________
-ETH_plot = px.bar(data_frame=Defi_MrkCap, x="name", y=["market_cap", "volume_24h"],
-                  title="ETHEREUM & OTHER ECOSYSTEMS: MARKTCAP vs. VOLUME_24HR", )
-ETH_plot.update_layout(legend_title="Features", width=1300, height=600,
-                       plot_bgcolor='rgba(0,0,0,0)')  # width=1300, height=450, title_x=0.5, title_y=.85,
-ETH_plot.update_xaxes(showgrid=False, title="Ecosystems")
-ETH_plot.update_yaxes(showgrid=False, title="MarktCap/Volume 24hr (USD)")
-st.plotly_chart(ETH_plot)
+if not Defi_MrkCap.empty:
+    ETH_plot = px.bar(
+        data_frame=Defi_MrkCap,
+        x="name",
+        y=["market_cap", "volume_24h"],
+        title="ETHEREUM & OTHER ECOSYSTEMS: MARKTCAP vs. VOLUME_24HR",
+    )
+    ETH_plot.update_layout(legend_title="Features", width=1300, height=600, plot_bgcolor='rgba(0,0,0,0)')
+    ETH_plot.update_xaxes(showgrid=False, title="Ecosystems")
+    ETH_plot.update_yaxes(showgrid=False, title="MarktCap/Volume 24hr (USD)")
+    st.plotly_chart(ETH_plot)
+else:
+    st.info("Ecosystem market-cap / volume chart skipped (no CoinGecko category snapshot). TVL and protocol charts below still load from DefiLlama.")
 
-DeFi_Categ3_plot = px.line(data_frame=DeFi_Categ3_Norm, x="name",
-                           y=["current_price", "market_cap", "total_volume", "circulating_supply", "total_supply"],
-                           title="DeFi TOKENS: LIQUIDITY vs. SUPPLY", )
-DeFi_Categ3_plot.update_layout(legend_title="Features", width=1300, height=600,
-                               plot_bgcolor='rgba(0,0,0,0)')  # width=1300, height=450, title_x=0.5, title_y=.85,
-DeFi_Categ3_plot.update_xaxes(showgrid=False, title="DeFi Tokens")
-DeFi_Categ3_plot.update_yaxes(showgrid=False, title="Value in (USD)")
-st.plotly_chart(DeFi_Categ3_plot)
+_line_y = [c for c in ["current_price", "market_cap", "total_volume", "circulating_supply", "total_supply"] if c in DeFi_Categ3_Norm.columns]
+if not DeFi_Categ3_Norm.empty and "name" in DeFi_Categ3_Norm.columns and _line_y:
+    DeFi_Categ3_plot = px.line(
+        data_frame=DeFi_Categ3_Norm,
+        x="name",
+        y=_line_y,
+        title="DeFi TOKENS: LIQUIDITY vs. SUPPLY",
+    )
+    DeFi_Categ3_plot.update_layout(legend_title="Features", width=1300, height=600, plot_bgcolor='rgba(0,0,0,0)')
+    DeFi_Categ3_plot.update_xaxes(showgrid=False, title="DeFi Tokens")
+    DeFi_Categ3_plot.update_yaxes(showgrid=False, title="Value in (USD)")
+    st.plotly_chart(DeFi_Categ3_plot)
+else:
+    st.warning("DeFi token line chart could not be built (missing columns).")
 "\n"
 "\n"
 st.info(
